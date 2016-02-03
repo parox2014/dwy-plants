@@ -6,7 +6,14 @@
         api:{
           SIGNIN:'',
           SIGNOUT:'',
-          SIGNUP:'/signup'
+          SIGNUP:'/signup',
+          PROFILE:'/profile'
+        },
+        events:{
+          REQUEST_START:'$requestStart',
+          REQUEST_ERROR:'$requestError',
+          RESPONSE_ERROR:'$responseError',
+          RESPONSE:'$response'
         }
       }
     })
@@ -18,8 +25,20 @@
         }
       }
     }])
+    //登录注册服务
+    .factory('Sign',SignService)
 
-    .service('Sign',SignService);
+    //地区服务
+    .factory('Region',RegionService)
+    //请求拦截器
+    .factory('Interceptor',Interceptor)
+    .config(function($locationProvider,$httpProvider){
+      $locationProvider.hashPrefix('!');
+      //设置ajax请求拦截器
+      $httpProvider.interceptors.push('Interceptor');
+      //配置请求头
+      $httpProvider.defaults.headers.common['X-Requested-With']='XMLHttpRequest';
+    });
 
 
 
@@ -29,7 +48,8 @@
     return {
       signin:signin,
       signout:signout,
-      signup:signup
+      signup:signup,
+      updateProfile:updateProfile
     };
 
     function signin(){
@@ -56,6 +76,66 @@
 
       return deffered.promise;
     }
+
+    function updateProfile(profile){
+
+      var deffered=$q.defer();
+
+      $http.post(api.PROFILE,profile)
+        .success(function(resp){
+          deffered.resolve(resp);
+        })
+        .error(function(err){
+
+          deffered.reject(err);
+        });
+
+      return deffered.promise;
+    }
+  }
+
+  function RegionService($http){
+    return {
+      queryCountryList:getCountry,
+      queryProviceList:getProvice,
+      queryCityList:getCity
+    };
+
+    function getCountry(){
+
+    }
+
+    function getProvice(){
+
+    }
+
+    function getCity(){
+
+    }
+  }
+
+  function ScheduleService
+
+  function Interceptor($q,$rootScope,Config){
+    var events=Config.events;
+    return {
+      request:function(config){
+        $rootScope.$broadcast(events.REQUEST_START,config);
+        return config;
+      },
+      requestError:function(rejection){
+        $rootScope.$broadcast(events.REQUEST_ERROR,rejection);
+        return $q.reject(rejection);
+      },
+      response:function(response){
+        $rootScope.$broadcast(events.RESPONSE,response);
+        return response;
+      },
+      responseError: function(rejection) {
+        $rootScope.$broadcast(events.RESPONSE_ERROR,rejection);
+        return $q.reject(rejection);
+      }
+    };
   }
 })();
 

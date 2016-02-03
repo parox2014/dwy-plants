@@ -14,26 +14,30 @@
       require: '?^ngModel',
       link: function ($scope, element, attr, ngModelCtrl) {
 
-        var getterNgModel = $parse(attr.ngModel);
-        var getterPassword = $parse(attr.repeatPassword);
+        var getterOPW = $parse(attr.ngModel);
+        var getterRPW = $parse(attr.repeatPassword);
 
         //监听密码的输入，有变动，则验证原始密码与重复密码是否相同
-        $scope.$watch(getterNgModel, function (val) {
-          var opw = getterPassword($scope);
-          validatePassword(opw, val);
-        });
-
-        //监听重复密码的输入，有变动，则验证原始密码与重复密码是否相同
-        $scope.$watch(getterPassword, function (val) {
-          var rpw = getterNgModel($scope);
-
-          if (!rpw)return;
+        $scope.$watch(getterOPW, function (val) {
+          var rpw = getterRPW($scope);
 
           validatePassword(val, rpw);
         });
 
-        function validatePassword(origin, confirm) {
-          var isSame = origin == confirm;
+        //监听重复密码的输入，有变动，则验证原始密码与重复密码是否相同
+        $scope.$watch(getterRPW, function (val) {
+          var opw = getterOPW($scope);
+
+          validatePassword(opw, val);
+        });
+
+        function validatePassword(origin, repeat) {
+          var isSame;
+          if(!origin&&!repeat){
+            isSame=true;
+          }else{
+            isSame= origin == repeat;
+          }
           ngModelCtrl.$setValidity('repeatPassword', isSame);
         }
       }

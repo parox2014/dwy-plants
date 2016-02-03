@@ -7,7 +7,7 @@
                     <input type="text"
                            placeholder=""
                            name="username"
-                           ng-pattern="/^\d*$/"
+                           ng-pattern="/^\d+$/"
                            ng-model="account.username">
                 </label>
                 <label class="item item-input">
@@ -15,11 +15,15 @@
                     <input type="password"
                            placeholder=""
                            name="password"
+                           ng-minlength="6"
+                           ng-maxlength="20"
                            ng-model="account.password">
                 </label>
                 <label class="item item-input">
                     <span class="input-label">Repeat Password</span>
                     <input type="password"
+                           ng-minlength="6"
+                           ng-maxlength="20"
                            repeat-password="account.password"
                            ng-model="account.reaptPassword"
                            placeholder="">
