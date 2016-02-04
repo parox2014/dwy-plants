@@ -1,5 +1,5 @@
 angular.module('app.controllers', [])
-  .controller('AppController', function ($scope, Config, $ionicLoading, $timeout) {
+  .controller('AppController', function ($scope, Config, $ionicLoading, $timeout,$ionicPopup,$state) {
     var events = Config.events;
 
     $scope.$on(events.REQUEST_START, function () {
@@ -14,7 +14,15 @@ angular.module('app.controllers', [])
       hideLoading();
     });
 
-    $scope.$on(events.RESPONSE_ERROR, function () {
+    $scope.$on(events.RESPONSE_ERROR, function (e,resp) {
+      if(resp.status===422){
+        return $state.go('login');
+      }
+
+      $ionicPopup.alert({
+        title:'warning',
+        template:resp.data.message
+      });
       hideLoading();
     });
 
@@ -33,9 +41,6 @@ angular.module('app.controllers', [])
       Sign.signin(account)
         .then(function(){
 
-        })
-        .catch(function(err){
-
         });
     }
   })
@@ -48,9 +53,6 @@ angular.module('app.controllers', [])
       Sign.sendEmail(vm.email)
         .then(function(resp){
           $state.go('passwordCreate')
-        })
-        .catch(function(err){
-          console.log(err);
         });
     };
 
@@ -77,11 +79,7 @@ angular.module('app.controllers', [])
 
   //用户注册
   .controller('CreateLoginCtrl', function ($scope, Sign, $state) {
-    var account = $scope.account = {
-      username: '',
-      password: '',
-      repeatPassword: ''
-    };
+    var account = $scope.account = {name:'william',password:String(123456),password_confirmation:String(123456)};
 
     $scope.onFormSubmit = onFormSubmit;
 
@@ -135,8 +133,8 @@ angular.module('app.controllers', [])
 
   })
 
-  .controller('ScheduleCtrl', function ($scope) {
-
+  .controller('ScheduleCtrl', function ($scope,Schedule) {
+    Schedule.query();
   })
 
   .controller('PlantsCtrl', function ($scope, Plant) {

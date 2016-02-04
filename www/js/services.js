@@ -2,12 +2,12 @@
   angular
     .module('app.services', ['ngResource'])
     .factory('Config', function () {
-      var BASE='http://plants.yunzujia.net/api/v1';
+      var BASE = 'http://plants.yunzujia.net/api/v1';
       return {
         api: {
-          SIGNIN: BASE+'/signin',
+          SIGNIN: BASE + '/auth/login',
           SIGNOUT: '/signout',
-          SIGNUP: BASE+'/auth/register',
+          SIGNUP: BASE + '/auth/register',
           PROFILE: '/profile',
           SCHEDULE: '/schedule',
           PLANT: '/plant',
@@ -22,12 +22,51 @@
       }
     })
     .factory('Session', [function () {
-      return {
-        user: null,
-        destroy: function () {
-          this.user = null
+      'use strict';
+      var token = window.localStorage.getItem('token');
+
+      var Session = {};
+
+      Object.defineProperty(Session, 'token', {
+        get: function () {
+          return token
+        },
+        set: function (value) {
+          if (!angular.isString(value)) {
+            throw new Error('token must be string')
+          }
+
+          if (value.length < 10) {
+            throw new Error('token\'s length invalid');
+          }
+          //保存token，同时保存到本地存储
+          token = value;
+          this._saveToLocalstorage(value);
         }
-      }
+      });
+
+      /**
+       * 销毁session
+       */
+      Session.destroy = function () {
+        token = null;
+        window.localStorage.removeItem('token');
+      };
+
+      Session._saveToLocalstorage = function (token) {
+        window.localStorage.setItem('token', token);
+      };
+
+      /**
+       * 获取token参数
+       * @returns {{token}}
+       */
+      Session.getTokenParam = function () {
+        return {token: token};
+      };
+
+      Session.token='eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjIsImlzcyI6Imh0dHA6XC9cL3BsYW50c19hcGkudGVzdC5jb21cL2FwaVwvYXV0aFwvbG9naW4iLCJpYXQiOjE0NTQ1NzUxODksImV4cCI6MTQ1NzE2NzE4OSwibmJmIjoxNDU0NTc1MTg5LCJqdGkiOiI2YTMwNmNiMzc4MDkyNjYyZmM1ZjBiM2JkMTdkMzM0MCJ9.96edlchPmB7Z8Vclrv8-CGeTtpXwIwSvQI6EY8DYL7o';
+      return Session;
     }])
     //登录注册服务
     .factory('Sign', SignService)
@@ -43,7 +82,7 @@
       //设置ajax请求拦截器
       $httpProvider.interceptors.push('Interceptor');
       //配置请求头
-      $httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+      //$httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
     });
 
 
@@ -69,7 +108,7 @@
       $http.post(api.SIGNIN, account)
         .success(function (resp) {
 
-          Session.user = resp;
+          Session.token = resp.token;
           deffered.resolve(resp);
         })
         .error(function (err) {
@@ -118,7 +157,7 @@
      * @returns {IHttpPromise<T>|*}
      */
     function updateProfile(profile) {
-      return $http.put(api.PROFILE, profile);
+      return $http.post(api.PROFILE, profile);
     }
 
     /**
@@ -153,9 +192,10 @@
   }
 
 
-  function ScheduleService(Config, $http, $q, $resource) {
-    return $resource(Config.api.SIGNIN + '/:id', {
-      id: '@id'
+  function ScheduleService(Config, $resource, Session) {
+    return $resource(Config.api.SCHEDULE + '/:id', {
+      id: '@id',
+      token:Session.token
     }, {
       update: {
         method: 'PUT'
@@ -164,9 +204,10 @@
   }
 
 
-  function PlantService(Config, $resource) {
+  function PlantService(Config, $resource,Session) {
     var Plant = $resource(Config.api.PLANT + '/:id', {
-      id: '@id'
+      id: '@id',
+      token:Session.token
     }, {
       update: {
         method: 'PUT'
