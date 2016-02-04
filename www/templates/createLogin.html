@@ -7,8 +7,10 @@
                     <input type="text"
                            placeholder=""
                            name="username"
-                           ng-pattern="/^\d+$/"
-                           ng-model="account.username">
+                           ng-minlength="6"
+                           ng-maxlength="60"
+                           required
+                           ng-model="account.name">
                 </label>
                 <label class="item item-input">
                     <span class="input-label">Password</span>
@@ -16,16 +18,18 @@
                            placeholder=""
                            name="password"
                            ng-minlength="6"
-                           ng-maxlength="20"
+                           ng-maxlength="60"
+                           required
                            ng-model="account.password">
                 </label>
                 <label class="item item-input">
                     <span class="input-label">Repeat Password</span>
                     <input type="password"
                            ng-minlength="6"
-                           ng-maxlength="20"
+                           ng-maxlength="60"
                            repeat-password="account.password"
-                           ng-model="account.reaptPassword"
+                           required
+                           ng-model="account.password_confirmation"
                            placeholder="">
                 </label>
             </ion-list>

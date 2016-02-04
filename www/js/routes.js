@@ -2,54 +2,48 @@ angular.module('app.routes', [])
 
   .config(function ($stateProvider, $urlRouterProvider) {
 
-    // Ionic uses AngularUI Router which uses the concept of states
-    // Learn more here: https://github.com/angular-ui/ui-router
-    // Set up the various states which the app can be in.
-    // Each state's controller can be found in controllers.js
     $stateProvider
-
 
       .state('login', {
         url: '/login',
         templateUrl: 'templates/login.html',
-        controller: 'loginCtrl'
+        controller: 'LoginCtrl'
       })
 
       .state('resetPassword', {
         url: '/passwordReset',
         templateUrl: 'templates/resetPassword.html',
-        controller: 'resetPasswordCtrl'
+        controller: 'ResetPasswordCtrl'
       })
 
       .state('createPassword', {
         url: '/passwordCreate',
         templateUrl: 'templates/createPassword.html',
-        controller: 'createPasswordCtrl'
+        controller: 'CreatePasswordCtrl'
       })
 
       .state('passwordSuccess', {
         url: '/passwordSuccess',
         templateUrl: 'templates/passwordSuccess.html',
-        controller: 'passwordSuccessCtrl'
+        controller: 'PasswordSuccessCtrl'
       })
 
       .state('termsAndCondition', {
         url: '/termsAndCondition',
         templateUrl: 'templates/termsAndCondition.html',
-        controller: 'termsAndConditionCtrl'
+        controller: 'TermsAndConditionCtrl'
       })
 
       .state('createLogin', {
         url: '/loginCreate',
         templateUrl: 'templates/createLogin.html',
-        controller: 'createLoginCtrl'
+        controller: 'CreateLoginCtrl'
       })
 
       .state('profile', {
         url: '/profile',
         templateUrl: 'templates/profile.html',
-        controller: 'profileCtrl',
-        onEnter: signInRequired
+        controller: 'ProfileCtrl'
       })
 
       .state('tabsController.schedule', {
@@ -57,7 +51,7 @@ angular.module('app.routes', [])
         views: {
           'tab1': {
             templateUrl: 'templates/schedule.html',
-            controller: 'scheduleCtrl'
+            controller: 'ScheduleCtrl'
           }
         }
       })
@@ -67,7 +61,7 @@ angular.module('app.routes', [])
         views: {
           'tab2': {
             templateUrl: 'templates/plants.html',
-            controller: 'plantsCtrl'
+            controller: 'PlantsCtrl'
           }
         }
       })
@@ -77,7 +71,7 @@ angular.module('app.routes', [])
         views: {
           'tab3': {
             templateUrl: 'templates/plantGrowth.html',
-            controller: 'plantGrowthCtrl'
+            controller: 'PlantGrowthCtrl'
           }
         }
       })
@@ -89,15 +83,9 @@ angular.module('app.routes', [])
       })
 
       .state('plantDetails', {
-        url: '/plantDetail',
+        url: '/plantDetail/:id',
         templateUrl: 'templates/plantDetails.html',
-        controller: 'plantDetailsCtrl'
-      })
-
-      .state('waterFrequency', {
-        url: '/waterFrequency',
-        templateUrl: 'templates/waterFrequency.html',
-        controller: 'waterFrequencyCtrl'
+        controller: 'PlantDetailsCtrl'
       })
 
       .state('menu', {
@@ -109,13 +97,13 @@ angular.module('app.routes', [])
       .state('plantGrowthList', {
         url: '/growthList',
         templateUrl: 'templates/plantGrowthList.html',
-        controller: 'plantGrowthListCtrl'
+        controller: 'PlantGrowthListCtrl'
       })
 
       .state('growthReading', {
         url: '/growthReading',
         templateUrl: 'templates/growthReading.html',
-        controller: 'growthReadingCtrl'
+        controller: 'GrowthReadingCtrl'
       });
 
     // if none of the above states are matched, use this as the fallback
