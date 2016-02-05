@@ -2,14 +2,14 @@
   angular
     .module('app.services', ['ngResource'])
     .factory('Config', function () {
-      var BASE = 'http://plants.yunzujia.net/api/v1';
+      var BASE = 'http://plants.yunzujia.net/api';
       return {
         api: {
           SIGNIN: BASE + '/auth/login',
           SIGNOUT: '/signout',
           SIGNUP: BASE + '/auth/register',
           PROFILE: '/profile',
-          SCHEDULE: '/schedule',
+          SCHEDULE: BASE+'/schedule',
           PLANT: '/plant',
           EMAIL: '/email'
         },
@@ -75,6 +75,7 @@
     .factory('Plant', PlantService)
     //地区服务
     .factory('Region', RegionService)
+    .factory('$toast',ToastService)
     //请求拦截器
     .factory('Interceptor', Interceptor)
     .config(function ($locationProvider, $httpProvider) {
@@ -229,6 +230,62 @@
     }
   }
 
+  function ToastService($compile,$rootScope,$document,$timeout){
+    var tpl='<div class="popup-container toast-showing" ng-class="{active:vm.show,\'toast-hidden\':!vm.show}"><div class="toast">{{vm.template}}</div></div>';
+    var body=$document[0].body;
+    var events='animationend webkitAnimationEnd mozAnimationEnd oAnimationEnd msAnimationEnd';
+    function Toast(option){
+      var defaults={
+        template:'',
+        delay:2000,
+        show:false
+      };
+
+      if(angular.isString(option)){
+        defaults.template=option;
+        this.option=defaults;
+      }else{
+        this.option=angular.extend(defaults,option);
+      }
+
+      this.scope=$rootScope.$new();
+
+      this.scope.vm=this.option;
+
+      this.$el=$compile(tpl)(this.scope);
+      angular.element(body).append(this.$el);
+    }
+
+    Toast.prototype={
+      show:function(){
+        var self=this;
+        this.scope.vm.show=true;
+        $timeout(function(){
+          self.hide();
+        },this.option.delay);
+        return this;
+      },
+      hide:function(){
+        var self=this;
+        this.scope.vm.show=false;
+        this.$el.bind(events,function(){
+          self.destroy();
+        });
+        return this;
+      },
+      destroy:function(){
+        this.$el.remove();
+        this.scope.$destroy();
+      }
+    };
+
+    return {
+      show:function(option){
+        var toast=new Toast(option);
+        return toast.show();
+      }
+    }
+  }
 
   function Interceptor($q, $rootScope, Config) {
     var events = Config.events;

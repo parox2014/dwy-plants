@@ -6,6 +6,8 @@
   <title></title>
 
   <link href="lib/ionic/css/ionic.css" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+
   <style type="text/css">
     input.ng-invalid {
       background: #fc8c84;
@@ -16,13 +18,13 @@
     }
   </style>
 </head>
-<body ng-app="app" animation="slide-left-right-ios7">
-<div ng-controller="AppController">
+<body ng-app="app" animation="slide-left-right-ios7" ng-controller="AppController">
+
   <ion-nav-bar class="bar-stable">
     <ion-nav-back-button class="button-icon icon ion-ios-arrow-back">Back</ion-nav-back-button>
   </ion-nav-bar>
   <ion-nav-view></ion-nav-view>
-</div>
+
 <script src="lib/ionic/js/ionic.bundle.js"></script>
 <script src="lib/ionic/js/angular/angular-resource.min.js"></script>
 <!-- cordova script (this will be a 404 during development) -->

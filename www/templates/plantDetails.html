@@ -1,21 +1,23 @@
 <ion-view title="Plant Details">
-    <ion-content overflow-scroll="true" padding="true" class="has-header">
-        <div style="line-height: 250px; border: 1px solid rgb(238, 238, 238); border-radius: 3px; text-align: center; width: 100%; height: auto; background-color: rgb(255, 255, 255);">
-            <i class="icon ion-image" style="font-size: 64px; color: rgb(136, 136, 136); vertical-align: middle;"></i>
-        </div>
-        <ion-list>
-            <ion-item class="item-text-wrap">This is where description of the plant goes. It could be something long.</ion-item>
-            <ion-toggle toggle-class="toggle-positive">Outdoor</ion-toggle>
-            <ion-toggle toggle-class="toggle-positive">Indoor</ion-toggle>
-            <ion-item class="item-divider">Schedule</ion-item>
-            <ion-item ng-click="openModal()">3 per day</ion-item>
-            <ion-item>6:30 AM, 12:30 PM, 6:30 PM</ion-item>
-            <ion-item class="item-divider">Notes</ion-item>
-            <label class="item item-input">
-                <textarea> </textarea>
-            </label>
-        </ion-list>
-        <a href="#/tabs/plants" class="button button-dark button-block ">Save</a>
-        <a href="#/tabs/plants" class="button button-stable button-block ">Cancel</a>
-    </ion-content>
+  <ion-content overflow-scroll="true" padding="true" class="has-header">
+    <div
+      style="line-height: 250px; border: 1px solid rgb(238, 238, 238); border-radius: 3px; text-align: center; width: 100%; height: auto; background-color: rgb(255, 255, 255);">
+      <i class="icon ion-image" style="font-size: 64px; color: rgb(136, 136, 136); vertical-align: middle;"></i>
+    </div>
+    <ion-list>
+      <ion-item class="item-text-wrap">This is where description of the plant goes. It could be something long.
+      </ion-item>
+      <ion-toggle toggle-class="toggle-positive">Outdoor</ion-toggle>
+      <ion-toggle toggle-class="toggle-positive">Indoor</ion-toggle>
+      <ion-item class="item-divider">Schedule</ion-item>
+      <ion-item ng-click="openModal()">3 per day</ion-item>
+      <ion-item>6:30 AM, 12:30 PM, 6:30 PM</ion-item>
+      <ion-item class="item-divider">Notes</ion-item>
+      <label class="item item-input">
+        <textarea> </textarea>
+      </label>
+    </ion-list>
+    <a href="#/tabs/plants" class="button button-dark button-block ">Save</a>
+    <a ng-click="$ionicGoBack()" class="button button-stable button-block ">Cancel</a>
+  </ion-content>
 </ion-view>

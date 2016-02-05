@@ -1,5 +1,5 @@
 angular.module('app.controllers', [])
-  .controller('AppController', function ($scope, Config, $ionicLoading, $timeout,$ionicPopup,$state) {
+  .controller('AppController', function ($scope, Config, $ionicLoading, $timeout,$ionicPopup,$state,$toast) {
     var events = Config.events;
 
     $scope.$on(events.REQUEST_START, function () {
@@ -15,12 +15,15 @@ angular.module('app.controllers', [])
     });
 
     $scope.$on(events.RESPONSE_ERROR, function (e,resp) {
+
+      console.error(resp);
+
       if(resp.status===422){
         return $state.go('login');
       }
 
       $ionicPopup.alert({
-        title:'warning',
+        title:'Warning',
         template:resp.data.message
       });
       hideLoading();
@@ -32,7 +35,7 @@ angular.module('app.controllers', [])
       }, 0);
     }
   })
-  .controller('LoginCtrl', function ($scope,Sign) {
+  .controller('LoginCtrl', function ($scope,Sign,$state) {
     var account=$scope.account={};
 
     $scope.onFormSubmit=onFormSubmit;
@@ -40,7 +43,7 @@ angular.module('app.controllers', [])
     function onFormSubmit(e){
       Sign.signin(account)
         .then(function(){
-
+          $state.go('main.tabs.shedule');
         });
     }
   })
@@ -54,10 +57,6 @@ angular.module('app.controllers', [])
         .then(function(resp){
           $state.go('passwordCreate')
         });
-    };
-
-    $scope.goBack=function(){
-      $ionicHistory.goBack()
     };
   })
 
@@ -78,7 +77,7 @@ angular.module('app.controllers', [])
   })
 
   //用户注册
-  .controller('CreateLoginCtrl', function ($scope, Sign, $state) {
+  .controller('RegisterCtrl', function ($scope, Sign, $state) {
     var account = $scope.account = {name:'william',password:String(123456),password_confirmation:String(123456)};
 
     $scope.onFormSubmit = onFormSubmit;
@@ -89,9 +88,6 @@ angular.module('app.controllers', [])
       Sign.signup(account)
         .then(function (resp) {
           $state.go('profile');
-        })
-        .catch(function (err) {
-          console.error(err);
         });
     }
   })

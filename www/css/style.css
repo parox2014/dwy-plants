@@ -1,1 +1,45 @@
 /* Empty. Add your own CSS if you like */
+
+.popup-container .toast {
+  width: 120px;
+  padding: 10px;
+  max-width: 100%;
+  max-height: 90%;
+  color: #fff;
+  text-align: center;
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -moz-box;
+  display: -moz-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-direction: normal;
+  -webkit-box-orient: vertical;
+  -webkit-flex-direction: column;
+  -moz-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.popup-container.toast-showing {
+  visibility: visible; }
+.popup-container.toast-hidden .toast {
+  -webkit-animation-name: scaleOut;
+  animation-name: scaleOut;
+  -webkit-animation-duration: 0.1s;
+  animation-duration: 0.1s;
+  -webkit-animation-timing-function: ease-in-out;
+  animation-timing-function: ease-in-out;
+  -webkit-animation-fill-mode: both;
+  animation-fill-mode: both; }
+.popup-container.active .toast {
+  -webkit-animation-name: superScaleIn;
+  animation-name: superScaleIn;
+  -webkit-animation-duration: 0.2s;
+  animation-duration: 0.2s;
+  -webkit-animation-timing-function: ease-in-out;
+  animation-timing-function: ease-in-out;
+  -webkit-animation-fill-mode: both;
+  animation-fill-mode: both; }
