@@ -1,5 +1,5 @@
 angular.module('app.controllers', [])
-  .controller('AppController', function ($scope, Config, $ionicLoading, $timeout,$ionicPopup,$state,$toast) {
+  .controller('AppController', function ($scope, Config, $ionicLoading, $timeout,$ionicPopup,$state,$cordovaLocalNotification) {
     var events = Config.events;
 
     $scope.$on(events.REQUEST_START, function () {
@@ -18,7 +18,7 @@ angular.module('app.controllers', [])
 
       console.error(resp);
 
-      if(resp.status===422){
+      if(resp.status===401){
         return $state.go('login');
       }
 
@@ -34,6 +34,8 @@ angular.module('app.controllers', [])
         $ionicLoading.hide();
       }, 0);
     }
+
+    //$cordovaLocalNotification.scheduler()
   })
   .controller('LoginCtrl', function ($scope,Sign,$state) {
     var account=$scope.account={};
@@ -78,7 +80,12 @@ angular.module('app.controllers', [])
 
   //用户注册
   .controller('RegisterCtrl', function ($scope, Sign, $state) {
-    var account = $scope.account = {name:'william',password:String(123456),password_confirmation:String(123456)};
+    var account = $scope.account = {
+      email:'parox2014@gmail.com',
+      password:String(123456),
+      password2:String(123456),
+      pass_agreement:1
+    };
 
     $scope.onFormSubmit = onFormSubmit;
 
@@ -87,26 +94,23 @@ angular.module('app.controllers', [])
 
       Sign.signup(account)
         .then(function (resp) {
+
+          return Sign.signin({email:resp.email,password:resp.password});
+        })
+        .then(function(resp){
           $state.go('profile');
         });
     }
   })
 
-  .controller('ProfileCtrl', function ($scope, Sign, $state) {
+  .controller('ProfileCtrl', function ($scope, Sign, $state,$toast) {
     var countryList = [
       {id: 1, name: 'China'},
       {id: 2, name: 'United States'},
       {id: 3, name: 'Krea'}
     ];
 
-    var profile = $scope.profile = {
-      firstName: '',
-      lastName: '',
-      email: '',
-      country: '',
-      state: '',
-      city: ''
-    };
+    var profile = $scope.profile = {};
 
     $scope.countryList = countryList;
 
@@ -120,17 +124,15 @@ angular.module('app.controllers', [])
       console.log(profile);
       Sign.updateProfile(profile)
         .then(function (resp) {
-          $state.go('tabsController.schedule')
-        })
-        .catch(function (err) {
-          console.log(err);
+          $toast.show('updat profile success');
+          $state.go('main.tabs.schedule')
         });
     }
 
   })
 
   .controller('ScheduleCtrl', function ($scope,Schedule) {
-    Schedule.query();
+    //Schedule.query();
   })
 
   .controller('PlantsCtrl', function ($scope, Plant) {

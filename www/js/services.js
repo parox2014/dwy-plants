@@ -2,13 +2,13 @@
   angular
     .module('app.services', ['ngResource'])
     .factory('Config', function () {
-      var BASE = 'http://plants.yunzujia.net/api';
+      var BASE = 'http://plants.yunzujia.net:8911/v1';
       return {
         api: {
-          SIGNIN: BASE + '/auth/login',
+          SIGNIN: BASE + '/user/login',
           SIGNOUT: '/signout',
-          SIGNUP: BASE + '/auth/register',
-          PROFILE: '/profile',
+          SIGNUP: BASE + '/user/signup',
+          PROFILE: BASE+'/user/update',
           SCHEDULE: BASE+'/schedule',
           PLANT: '/plant',
           EMAIL: '/email'
@@ -62,10 +62,10 @@
        * @returns {{token}}
        */
       Session.getTokenParam = function () {
-        return {token: token};
+        return {access_token: token};
       };
 
-      Session.token='eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjIsImlzcyI6Imh0dHA6XC9cL3BsYW50c19hcGkudGVzdC5jb21cL2FwaVwvYXV0aFwvbG9naW4iLCJpYXQiOjE0NTQ1NzUxODksImV4cCI6MTQ1NzE2NzE4OSwibmJmIjoxNDU0NTc1MTg5LCJqdGkiOiI2YTMwNmNiMzc4MDkyNjYyZmM1ZjBiM2JkMTdkMzM0MCJ9.96edlchPmB7Z8Vclrv8-CGeTtpXwIwSvQI6EY8DYL7o';
+      //Session.token='eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjIsImlzcyI6Imh0dHA6XC9cL3BsYW50c19hcGkudGVzdC5jb21cL2FwaVwvYXV0aFwvbG9naW4iLCJpYXQiOjE0NTQ1NzUxODksImV4cCI6MTQ1NzE2NzE4OSwibmJmIjoxNDU0NTc1MTg5LCJqdGkiOiI2YTMwNmNiMzc4MDkyNjYyZmM1ZjBiM2JkMTdkMzM0MCJ9.96edlchPmB7Z8Vclrv8-CGeTtpXwIwSvQI6EY8DYL7o';
       return Session;
     }])
     //登录注册服务
@@ -84,6 +84,20 @@
       $httpProvider.interceptors.push('Interceptor');
       //配置请求头
       //$httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+
+      $httpProvider.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
+
+      $httpProvider.defaults.headers.put['Content-Type'] = 'application/x-www-form-urlencoded';
+
+      $httpProvider.defaults.transformRequest=function(param){
+        var paramArr=[];
+
+        for(var key in param){
+          paramArr.push(key+'='+param[key]);
+        }
+
+        return paramArr.join('&');
+      };
     });
 
 
@@ -109,7 +123,7 @@
       $http.post(api.SIGNIN, account)
         .success(function (resp) {
 
-          Session.token = resp.token;
+          Session.token = resp.access_token;
           deffered.resolve(resp);
         })
         .error(function (err) {
@@ -158,7 +172,7 @@
      * @returns {IHttpPromise<T>|*}
      */
     function updateProfile(profile) {
-      return $http.post(api.PROFILE, profile);
+      return $http.put(api.PROFILE, profile,{params:Session.getTokenParam()});
     }
 
     /**

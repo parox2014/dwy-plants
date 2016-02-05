@@ -3,14 +3,12 @@
         <form class="list" name="signinForm" ng-submit="onFormSubmit($event)" novalidate>
             <ion-list>
                 <label class="item item-input">
-                    <span class="input-label">Username</span>
-                    <input type="text"
-                           placeholder=""
-                           name="username"
-                           ng-minlength="6"
-                           ng-maxlength="60"
+                    <span class="input-label">Email</span>
+                    <input type="email"
+                           placeholder="user@example.com"
+                           name="email"
                            required
-                           ng-model="account.name">
+                           ng-model="account.email">
                 </label>
                 <label class="item item-input">
                     <span class="input-label">Password</span>
@@ -29,7 +27,7 @@
                            ng-maxlength="60"
                            repeat-password="account.password"
                            required
-                           ng-model="account.password_confirmation"
+                           ng-model="account.password2"
                            placeholder="">
                 </label>
             </ion-list>
