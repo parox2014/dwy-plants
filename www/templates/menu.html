@@ -8,6 +8,10 @@
       <ion-nav-buttons side="left">
         <button class="button button-icon button-clear ion-navicon" menu-toggle="left">
         </button>
+
+        <div class="buttons item-button-right" ng-if="vm.isShow">
+          <a ui-sref="main.tabs.plantsAdd" class="button button-icon"><i class="ion-plus"></i> </a>
+        </div>
       </ion-nav-buttons>
     </ion-nav-bar>
     <ion-nav-view name="main"></ion-nav-view>

@@ -40,7 +40,7 @@ angular.module('app.routes', [])
       .state('createPassword', {
         url: '/passwordCreate',
         templateUrl: 'templates/createPassword.html',
-        controller: 'CreatePasswordCtrl'
+        controller: 'ModifyPasswordCtrl'
       })
 
       //创建新密码成功
@@ -71,6 +71,7 @@ angular.module('app.routes', [])
 
       .state('main.tabs.schedule', {
         url: '/schedule',
+        cache:false,
         views: {
           'schedule': {
             templateUrl: 'templates/schedule.html',
@@ -81,10 +82,22 @@ angular.module('app.routes', [])
 
       .state('main.tabs.plants', {
         url: '/plants',
+        cache:false,
         views: {
           plants: {
             templateUrl: 'templates/plants.html',
             controller: 'PlantsCtrl'
+          }
+        }
+      })
+
+      .state('main.tabs.plantsAdd', {
+        url: '/plantsAdd',
+        cache:false,
+        views: {
+          plants: {
+            templateUrl: 'templates/plantDetails.html',
+            controller: 'PlantsAddCtrl'
           }
         }
       })

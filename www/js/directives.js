@@ -2,7 +2,8 @@
   angular.module('app.directives', [])
 
 
-    .directive('repeatPassword',repeatPasswordDirective);
+    .directive('repeatPassword', repeatPasswordDirective)
+    .directive('ngGeoNames', ngGeoNamesDirective);
 
   /**
    * @description 重复密码一致性验证
@@ -33,15 +34,60 @@
 
         function validatePassword(origin, repeat) {
           var isSame;
-          if(!origin&&!repeat){
-            isSame=true;
-          }else{
-            isSame= origin == repeat;
+          if (!origin && !repeat) {
+            isSame = true;
+          } else {
+            isSame = origin == repeat;
           }
           ngModelCtrl.$setValidity('repeatPassword', isSame);
         }
       }
     };
+  }
+
+  function ngGeoNamesDirective(GeoNames) {
+    return {
+      restrict: 'E',
+      templateUrl: 'templates/geoNames.html',
+      scope: {
+        viewModel: '='
+      },
+      link: function (scope, element, attrs) {
+        var vm = scope.vm = {
+          countryDisabled: true,
+          stateDisabled: true,
+          cityDisabled: true
+        };
+
+        scope.$watch('viewModel.country', function (country) {
+          if (!country)return;
+
+          vm.stateDisabled = true;
+          GeoNames.queryProviceList(country.geonameId)
+            .then(function (resp) {
+              vm.stateDisabled = false;
+              scope.stateList = resp;
+            })
+        }, true);
+
+        scope.$watch('viewModel.state', function (state) {
+          if (!state)return;
+
+          vm.cityDisabled = true;
+          GeoNames.queryCityList(state.geonameId)
+            .then(function (resp) {
+              vm.cityDisabled = false;
+              scope.cityList = resp;
+            })
+        }, true);
+
+        GeoNames.queryCountryList()
+          .then(function (resp) {
+            vm.countryDisabled = false;
+            scope.countryList = resp;
+          });
+      }
+    }
   }
 })();
 

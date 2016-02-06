@@ -2,59 +2,88 @@
   angular
     .module('app.services', ['ngResource'])
     .factory('Config', function () {
-      var BASE = 'http://plants.yunzujia.net:8911/v1';
+      var BASE = 'http://plants.yunzujia.net:8992/v1';
+      var GEO_NAMES_BASE = 'http://api.geonames.org';
       return {
         api: {
           SIGNIN: BASE + '/user/login',
           SIGNOUT: '/signout',
           SIGNUP: BASE + '/user/signup',
-          PROFILE: BASE+'/user/update',
-          SCHEDULE: BASE+'/schedule',
-          PLANT: '/plant',
-          EMAIL: '/email'
+          PROFILE: BASE + '/user/update',
+          MY_PROFILE: BASE + '/user/me',
+          CHANGE_PASSWORD: BASE + '/user/change-password',
+          SCHEDULE: BASE + '/schedule',
+          PLANT: BASE + '/plants',
+          PLANT_DEMO: BASE + '/plant-demo',
+          COUNTRY_JSON: GEO_NAMES_BASE + '/countryInfoJSON',
+          CHILDREN_JSON: GEO_NAMES_BASE + '/childrenJSON'
         },
         events: {
           REQUEST_START: '$requestStart',
           REQUEST_ERROR: '$requestError',
           RESPONSE_ERROR: '$responseError',
           RESPONSE: '$response'
-        }
+        },
+        GEO_NAMES_ACCOUNT: 'plants_schedule'
       }
     })
-    .factory('Session', [function () {
+    .factory('Session', function ($http) {
       'use strict';
-      var token = window.localStorage.getItem('token');
+      var localStorage = window.localStorage;
+      var token = localStorage.getItem('token');
+      var user = angular.fromJson(localStorage.getItem('user'));
+
+      if (token) {
+        setAuthorization(token);
+      }
 
       var Session = {};
 
-      Object.defineProperty(Session, 'token', {
-        get: function () {
-          return token
-        },
-        set: function (value) {
-          if (!angular.isString(value)) {
-            throw new Error('token must be string')
-          }
-
-          if (value.length < 10) {
-            throw new Error('token\'s length invalid');
-          }
-          //保存token，同时保存到本地存储
-          token = value;
-          this._saveToLocalstorage(value);
+      Session.set = function (value) {
+        if (!angular.isString(value)) {
+          throw new Error('token must be string')
         }
-      });
 
+        if (value.length < 10) {
+          throw new Error('token\'s length invalid');
+        }
+        //save the access token,and save to localStorage
+        token = value;
+        this._saveToLocalstorage(value);
+
+        setAuthorization(value);
+      };
+
+
+      Session.get = function () {
+        return token;
+      };
+
+      Session.setSessionUser = function (userObj) {
+        user = userObj;
+
+        localStorage.setItem('user', angular.toJson(userObj));
+      };
+
+      Session.getSessionUser = function () {
+        return user;
+      };
+
+      Session.isLogin = function () {
+        return !!token;
+      };
       /**
        * 销毁session
        */
       Session.destroy = function () {
         token = null;
-        window.localStorage.removeItem('token');
+        user = null;
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
       };
 
       Session._saveToLocalstorage = function (token) {
-        window.localStorage.setItem('token', token);
+        localStorage.setItem('token', token);
       };
 
       /**
@@ -65,17 +94,21 @@
         return {access_token: token};
       };
 
-      //Session.token='eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjIsImlzcyI6Imh0dHA6XC9cL3BsYW50c19hcGkudGVzdC5jb21cL2FwaVwvYXV0aFwvbG9naW4iLCJpYXQiOjE0NTQ1NzUxODksImV4cCI6MTQ1NzE2NzE4OSwibmJmIjoxNDU0NTc1MTg5LCJqdGkiOiI2YTMwNmNiMzc4MDkyNjYyZmM1ZjBiM2JkMTdkMzM0MCJ9.96edlchPmB7Z8Vclrv8-CGeTtpXwIwSvQI6EY8DYL7o';
+
+      function setAuthorization(token) {
+        //$http.defaults.headers.common['Authorization']='Basic '+token;
+      }
+
       return Session;
-    }])
+    })
     //登录注册服务
     .factory('Sign', SignService)
     //日程
     .factory('Schedule', ScheduleService)
     .factory('Plant', PlantService)
     //地区服务
-    .factory('Region', RegionService)
-    .factory('$toast',ToastService)
+    .factory('GeoNames', GeoNamesService)
+    .factory('$toast', ToastService)
     //请求拦截器
     .factory('Interceptor', Interceptor)
     .config(function ($locationProvider, $httpProvider) {
@@ -89,11 +122,13 @@
 
       $httpProvider.defaults.headers.put['Content-Type'] = 'application/x-www-form-urlencoded';
 
-      $httpProvider.defaults.transformRequest=function(param){
-        var paramArr=[];
+      $httpProvider.defaults.transformRequest = function (param) {
+        var paramArr = [];
 
-        for(var key in param){
-          paramArr.push(key+'='+param[key]);
+        for (var key in param) {
+          if (param.hasOwnProperty(key)) {
+            paramArr.push(key + '=' + param[key]);
+          }
         }
 
         return paramArr.join('&');
@@ -109,7 +144,8 @@
       signout: signout,
       signup: signup,
       updateProfile: updateProfile,
-      sendEmail: sendEmail
+      getMyProfile: getMyProfile,
+      modifyPassword: modifyPassword
     };
 
     /**
@@ -123,7 +159,8 @@
       $http.post(api.SIGNIN, account)
         .success(function (resp) {
 
-          Session.token = resp.access_token;
+          Session.set(resp.access_token);
+          Session.setSessionUser(resp);
           deffered.resolve(resp);
         })
         .error(function (err) {
@@ -139,6 +176,7 @@
      * @returns {*}
      */
     function signout() {
+      Session.destroy();
       return $http.get(api.SIGNOUT);
     }
 
@@ -168,41 +206,136 @@
 
     /**
      * 更新用户资料
-     * @param profile
+     * @param profile {Object}
      * @returns {IHttpPromise<T>|*}
      */
     function updateProfile(profile) {
-      return $http.put(api.PROFILE, profile,{params:Session.getTokenParam()});
+      var defer = $q.defer();
+
+      $http.put(api.PROFILE, profile, {params: Session.getTokenParam()})
+        .success(function (resp) {
+          Session.setSessionUser(resp);
+          defer.resolve(resp);
+        })
+        .error(function (err) {
+          defer.reject(err);
+        });
+
+      return defer.promise;
+    }
+
+
+    /**
+     * get my profile
+     * @returns {IHttpPromise<T>|*}
+     */
+    function getMyProfile() {
+      return $http.get(api.MY_PROFILE, {params: Session.getTokenParam()});
     }
 
     /**
-     * 发送邮件
-     * @param email {String} 电子邮箱
+     * modify password
+     * @param formData {Object} password password2
      * @returns {IHttpPromise<T>|*}
      */
-    function sendEmail(email) {
-      return $http.post(api.EMAIL, {email: email});
+    function modifyPassword(formData) {
+      return $http.post(api.CHANGE_PASSWORD, formData, {params: Session.getTokenParam()})
     }
   }
 
 
-  function RegionService($http) {
+  function GeoNamesService($http, Config, $q) {
+    var api = Config.api;
+    var localStorage = window.localStorage;
+    var apiMap = {
+      country: api.COUNTRY_JSON,
+      state: api.CHILDREN_JSON,
+      city: api.CHILDREN_JSON
+    };
+
     return {
       queryCountryList: getCountry,
       queryProviceList: getProvice,
       queryCityList: getCity
     };
 
+    /**
+     * get common parmas
+     * @private
+     * @returns {{userName: string, callback: string, lang: string, _: number}}
+     */
+    function getParmas() {
+      return {
+        userName: Config.GEO_NAMES_ACCOUNT,
+        callback: 'JSON_CALLBACK',
+        lang: 'zh-CN',
+        _: Date.now()
+      };
+    }
+
+    /**
+     * query country or state or city by type and save the data to localStorage
+     * @private
+     * @param type {String}
+     * @param params {Object}
+     * @param localStorageKey {String}
+     * @returns {IPromise<T>}
+     */
+    function query(type, params, localStorageKey) {
+      var defer = $q.defer();
+      var uri = apiMap[type];
+      var data = localStorage.getItem(localStorageKey);
+
+      if (data) {
+        defer.resolve(angular.fromJson(data));
+      } else {
+        $http.jsonp(uri, {
+            params: params,
+            transformResponse: function (resp) {
+              return resp.geonames ? resp.geonames : [];
+            }
+          })
+          .success(function (resp) {
+            localStorage.setItem(localStorageKey, angular.toJson(resp));
+            defer.resolve(resp);
+          });
+      }
+
+      return defer.promise;
+    }
+
+    /**
+     * get all country on the earth
+     * @returns {IPromise.<T>}
+     */
     function getCountry() {
-
+      return query('country', getParmas(), 'countryList');
     }
 
-    function getProvice() {
+    /**
+     * get country's children by country's geonameId
+     * @param geonameId {String}
+     * @returns {IPromise.<T>}
+     */
+    function getProvice(geonameId) {
+      var params = getParmas();
 
+      params.geonameId = geonameId;
+
+      return query('state', params, geonameId);
     }
 
-    function getCity() {
+    /**
+     * get state or province's children by geonameId
+     * @param geonameId {String}
+     * @returns {IPromise.<T>}
+     */
+    function getCity(geonameId) {
+      var params = getParmas();
 
+      params.geonameId = geonameId;
+
+      return query('city', params, geonameId);
     }
   }
 
@@ -210,7 +343,7 @@
   function ScheduleService(Config, $resource, Session) {
     return $resource(Config.api.SCHEDULE + '/:id', {
       id: '@id',
-      token:Session.token
+      token: Session.get()
     }, {
       update: {
         method: 'PUT'
@@ -219,83 +352,86 @@
   }
 
 
-  function PlantService(Config, $resource,Session) {
-    var Plant = $resource(Config.api.PLANT + '/:id', {
+  function PlantService(Config, $resource, Session) {
+    return $resource(Config.api.PLANT + '/:id', {
       id: '@id',
-      token:Session.token
+      access_token: Session.get()
     }, {
+      query: {
+        method: 'GET',
+        isArray: true,
+        transformResponse: transformResponse
+      },
       update: {
         method: 'PUT'
+      },
+      queryDemo: {
+        url: Config.api.PLANT_DEMO,
+        method: 'GET',
+        params: {page: 1},
+        isArray: true,
+        transformResponse: transformResponse
       }
     });
-
-    return {
-      query: function () {
-        var plants = [];
-
-        for (var i = 0; i < 20; i++) {
-          plants.push({
-            id: 1000 + i,
-            name: 'Plant ' + i
-          });
-        }
-        return plants;
-      }
+    function transformResponse(resp) {
+      resp = angular.fromJson(resp);
+      return resp ? resp.items : [];
     }
   }
 
-  function ToastService($compile,$rootScope,$document,$timeout){
-    var tpl='<div class="popup-container toast-showing" ng-class="{active:vm.show,\'toast-hidden\':!vm.show}"><div class="toast">{{vm.template}}</div></div>';
-    var body=$document[0].body;
-    var events='animationend webkitAnimationEnd mozAnimationEnd oAnimationEnd msAnimationEnd';
-    function Toast(option){
-      var defaults={
-        template:'',
-        delay:2000,
-        show:false
+  function ToastService($compile, $rootScope, $document, $timeout) {
+    var tpl = '<div class="popup-container toast-showing" ng-class="{active:vm.show,\'toast-hidden\':!vm.show}"><div class="toast">{{vm.template}}</div></div>';
+    var body = $document[0].body;
+    var events = 'animationend webkitAnimationEnd mozAnimationEnd oAnimationEnd msAnimationEnd';
+
+    function Toast(option) {
+      var defaults = {
+        template: '',
+        delay: 2000,
+        show: false
       };
 
-      if(angular.isString(option)){
-        defaults.template=option;
-        this.option=defaults;
-      }else{
-        this.option=angular.extend(defaults,option);
+      if (angular.isString(option)) {
+        defaults.template = option;
+        this.option = defaults;
+      } else {
+        this.option = angular.extend(defaults, option);
       }
 
-      this.scope=$rootScope.$new();
+      this.scope = $rootScope.$new();
 
-      this.scope.vm=this.option;
+      this.scope.vm = this.option;
 
-      this.$el=$compile(tpl)(this.scope);
+      this.$el = $compile(tpl)(this.scope);
       angular.element(body).append(this.$el);
     }
 
-    Toast.prototype={
-      show:function(){
-        var self=this;
-        this.scope.vm.show=true;
-        $timeout(function(){
+    Toast.prototype = {
+      show: function () {
+        var self = this;
+        this.scope.vm.show = true;
+        $timeout(function () {
           self.hide();
-        },this.option.delay);
+        }, this.option.delay);
         return this;
       },
-      hide:function(){
-        var self=this;
-        this.scope.vm.show=false;
-        this.$el.bind(events,function(){
+      hide: function () {
+        var self = this;
+        this.scope.vm.show = false;
+        this.$el.bind(events, function () {
           self.destroy();
         });
         return this;
       },
-      destroy:function(){
+      destroy: function () {
         this.$el.remove();
         this.scope.$destroy();
       }
     };
 
     return {
-      show:function(option){
-        var toast=new Toast(option);
+      show: function (option) {
+        var toast = new Toast(option);
         return toast.show();
       }
     }
