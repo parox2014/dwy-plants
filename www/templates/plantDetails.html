@@ -1,25 +1,44 @@
 <ion-view title="{{vm.title}}">
   <ion-content overflow-scroll="true" padding="true" class="has-header">
-    <div
-      style="line-height: 250px; border: 1px solid rgb(238, 238, 238); border-radius: 3px; text-align: center; width: 100%; height: auto; background-color: rgb(255, 255, 255);">
-      <i class="icon ion-image" style="font-size: 64px; color: rgb(136, 136, 136); vertical-align: middle;" ng-if="!plant.image"></i>
-      <img ng-src="plant.image" ng-if="plant.image">
+    <div style="border: 1px solid rgb(238, 238, 238); border-radius: 3px; text-align: center; width: 100%; background-color: #fff;"
+      class="padding">
+      <i class="icon ion-image" style="font-size: 64px; color: rgb(136, 136, 136); vertical-align: middle;"
+         ng-if="!plant.image"></i>
+      <img ng-src="{{plant.image}}" style="width: 100%;" ng-if="plant.image">
     </div>
     <ion-list>
       <ion-item class="item-text-wrap">
-        This is where description of the plant goes. It could be something long.
+        {{plant.description}}
       </ion-item>
-      <ion-toggle toggle-class="toggle-positive" ng-model="plant.sunlight">Outdoor</ion-toggle>
-      <ion-toggle toggle-class="toggle-positive" ng-model="plant.nosunlight">Indoor</ion-toggle>
+
+      <ion-toggle toggle-class="toggle-positive"
+                  ng-model="plant.sunlight">Sunlight</ion-toggle>
+      <ion-toggle toggle-class="toggle-positive"
+                  do-not-aollow-both-false="plant.sunlight"
+                  ng-model="plant.nosunlight">Nosunlight</ion-toggle>
+      <ion-item>
+        <label>End Date</label>
+        <input type="date" ng-model="plant.end_date" min-date="{{}}" name="end_date">
+      </ion-item>
+
       <ion-item class="item-divider">Schedule</ion-item>
-      <ion-item ng-click="openModal()">{{plant.water_times}}</ion-item>
-      <ion-item>6:30 AM, 12:30 PM, 6:30 PM</ion-item>
+
+      <ion-item ng-click="openModal()" ng-switch="plant.water_times">
+        <span ng-switch-when="1">Once a day</span>
+        <span ng-switch-when="2">2 per day</span>
+        <span ng-switch-when="3">3 per day</span>
+      </ion-item>
+      <ion-item ng-switch="plant.water_times">
+        <span ng-switch-when="1">6:30 AM</span>
+        <span ng-switch-when="2">6:30 AM, 6:30 PM</span>
+        <span ng-switch-when="3">6:30 AM, 12:30 PM, 6:30 PM</span>
+      </ion-item>
       <ion-item class="item-divider">Notes</ion-item>
       <label class="item item-input">
-        <textarea ng-model="plant.description"> </textarea>
+        <textarea ng-model="plant.notes"> </textarea>
       </label>
     </ion-list>
-    <button class="button button-dark button-block" ng-click="addPlant()">Save</button>
+    <button class="button button-dark button-block" ng-click="savePlant()">Save</button>
     <a ng-click="$ionicGoBack()" class="button button-stable button-block ">Cancel</a>
   </ion-content>
 </ion-view>

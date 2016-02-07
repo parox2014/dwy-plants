@@ -12,8 +12,7 @@ angular.module('app.routes', [])
       //注册条款
       .state('termsAndCondition', {
         url: '/termsAndCondition',
-        templateUrl: 'templates/termsAndCondition.html',
-        controller: 'TermsAndConditionCtrl'
+        templateUrl: 'templates/termsAndCondition.html'
       })
       //注册
       .state('register', {
@@ -22,41 +21,13 @@ angular.module('app.routes', [])
         controller: 'RegisterCtrl'
       })
 
-      //填写用户资料
-      .state('profile', {
-        url: '/profile',
-        templateUrl: 'templates/profile.html',
-        controller: 'ProfileCtrl'
-      })
-
-      //密码重置
-      .state('resetPassword', {
-        url: '/passwordReset',
-        templateUrl: 'templates/resetPassword.html',
-        controller: 'ResetPasswordCtrl'
-      })
-
-      //创建新密码
-      .state('createPassword', {
-        url: '/passwordCreate',
-        templateUrl: 'templates/createPassword.html',
-        controller: 'ModifyPasswordCtrl'
-      })
-
-      //创建新密码成功
-      .state('passwordSuccess', {
-        url: '/passwordSuccess',
-        templateUrl: 'templates/passwordSuccess.html',
-        controller: 'PasswordSuccessCtrl'
-      })
-
-
-
       //main为应用主路由，main里面所有的路由，都需要用户登录才能访问
       .state('main',{
         url:'/main',
         abstract:true,
-        templateUrl:'templates/menu.html'
+        templateUrl:'templates/menu.html',
+        controller:'MainCtrl',
+        onEnter:signInRequired
       })
 
       .state('main.tabs', {
@@ -80,6 +51,17 @@ angular.module('app.routes', [])
         }
       })
 
+      .state('main.tabs.plantDemo', {
+        url: '/plantsDemo',
+        cache:false,
+        views: {
+          plants: {
+            templateUrl: 'templates/plantsDemo.html',
+            controller: 'PlantsDemoCtrl'
+          }
+        }
+      })
+
       .state('main.tabs.plants', {
         url: '/plants',
         cache:false,
@@ -92,7 +74,7 @@ angular.module('app.routes', [])
       })
 
       .state('main.tabs.plantsAdd', {
-        url: '/plantsAdd',
+        url: '/plantsAdd/:demoId',
         cache:false,
         views: {
           plants: {
@@ -114,6 +96,7 @@ angular.module('app.routes', [])
 
       .state('plantDetails', {
         url: '/plantDetail/:id',
+        cache:false,
         templateUrl: 'templates/plantDetails.html',
         controller: 'PlantDetailsCtrl'
       })/*.state('main.tabs.plantDetails', {
@@ -144,14 +127,42 @@ angular.module('app.routes', [])
             controller: 'GrowthReadingCtrl'
           }
         }
+      })
+      .state('main.settings',{
+        url:'/settings',
+        views:{
+          main:{
+            templateUrl:'templates/settings.html'
+          }
+        }
+      })
+
+      .state('main.passwordSettings', {
+        url: '/password-settings',
+        views:{
+          main:{
+            templateUrl: 'templates/createPassword.html',
+            controller: 'PasswordSettingsCtrl'
+          }
+        }
+      })
+
+      .state('main.profileSettings', {
+        url: '/profile-settings/:toState',
+        views:{
+          main:{
+            templateUrl: 'templates/profile.html',
+            controller: 'ProfileCtrl'
+          }
+        }
       });
 
     // if none of the above states are matched, use this as the fallback
     $urlRouterProvider.otherwise('/login');
 
     function signInRequired(Session, $state) {
-      if (!Session.token) {
-        $state.go('login');
+      if (!Session.isLogin()) {
+        return $state.go('login',{},{location:'replace'});
       }
     }
   });

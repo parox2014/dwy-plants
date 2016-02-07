@@ -43,3 +43,7 @@
   animation-timing-function: ease-in-out;
   -webkit-animation-fill-mode: both;
   animation-fill-mode: both; }
+
+.item-icon-right .icon-small,.item-icon-left .icon-small{
+  font-size: 22px;
+}

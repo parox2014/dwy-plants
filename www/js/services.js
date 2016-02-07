@@ -11,8 +11,9 @@
           SIGNUP: BASE + '/user/signup',
           PROFILE: BASE + '/user/update',
           MY_PROFILE: BASE + '/user/me',
+          WATER_TIME: BASE + '/water-times',
           CHANGE_PASSWORD: BASE + '/user/change-password',
-          SCHEDULE: BASE + '/schedule',
+          SCHEDULE: BASE + '/schedules',
           PLANT: BASE + '/plants',
           PLANT_DEMO: BASE + '/plant-demo',
           COUNTRY_JSON: GEO_NAMES_BASE + '/countryInfoJSON',
@@ -65,6 +66,11 @@
         localStorage.setItem('user', angular.toJson(userObj));
       };
 
+      Session.updateSessionUser=function(userObj){
+        angular.extend(user,userObj);
+        localStorage.setItem('user', angular.toJson(userObj));
+      };
+
       Session.getSessionUser = function () {
         return user;
       };
@@ -103,9 +109,13 @@
     })
     //登录注册服务
     .factory('Sign', SignService)
+    .factory('WaterTime',WaterTimeService)
     //日程
     .factory('Schedule', ScheduleService)
     .factory('Plant', PlantService)
+    .factory('Cache', function () {
+      return {}
+    })
     //地区服务
     .factory('GeoNames', GeoNamesService)
     .factory('$toast', ToastService)
@@ -122,19 +132,20 @@
 
       $httpProvider.defaults.headers.put['Content-Type'] = 'application/x-www-form-urlencoded';
 
-      $httpProvider.defaults.transformRequest = function (param) {
-        var paramArr = [];
-
-        for (var key in param) {
-          if (param.hasOwnProperty(key)) {
-            paramArr.push(key + '=' + param[key]);
-          }
-        }
-
-        return paramArr.join('&');
-      };
+      $httpProvider.defaults.transformRequest = serialParam;
     });
 
+  function serialParam(param) {
+    var paramArr = [];
+
+    for (var key in param) {
+      if (param.hasOwnProperty(key)) {
+        paramArr.push(key + '=' + param[key]);
+      }
+    }
+
+    return paramArr.join('&');
+  }
 
   function SignService($http, Session, $q, Config) {
     var api = Config.api;
@@ -176,8 +187,13 @@
      * @returns {*}
      */
     function signout() {
+      var defer=$q.defer();
+
       Session.destroy();
-      return $http.get(api.SIGNOUT);
+
+      defer.resolve('sucess');
+
+      return defer.promise;
     }
 
 
@@ -214,7 +230,7 @@
 
       $http.put(api.PROFILE, profile, {params: Session.getTokenParam()})
         .success(function (resp) {
-          Session.setSessionUser(resp);
+          Session.updateSessionUser(resp);
           defer.resolve(resp);
         })
         .error(function (err) {
@@ -341,10 +357,24 @@
 
 
   function ScheduleService(Config, $resource, Session) {
+    //?time=future&water_time=morning&is_done=0&plant_id=1&expand=plant
     return $resource(Config.api.SCHEDULE + '/:id', {
       id: '@id',
-      token: Session.get()
+      access_token: Session.get()
     }, {
+      query: {
+        method: 'GET',
+        params: {
+          time: 'today',
+          is_done: 0,
+          expand: 'plant'
+        },
+        isArray: true,
+        transformResponse: function (resp) {
+          resp = angular.fromJson(resp);
+          return resp.items;
+        }
+      },
       update: {
         method: 'PUT'
       }
@@ -357,23 +387,69 @@
       id: '@id',
       access_token: Session.get()
     }, {
+      get: {
+        method: 'GET',
+        isArray: false,
+        transformResponse: transformResponseOne
+      },
+      save: {
+        method: 'POST',
+        transformRequest: transformRequest,
+        transformResponse:transformResponseOne
+      },
       query: {
         method: 'GET',
         isArray: true,
-        transformResponse: transformResponse
+        transformResponse: transformResponseList
       },
       update: {
-        method: 'PUT'
+        method: 'PUT',
+        transformRequest: transformRequest,
+        transformResponse: transformResponseOne
       },
       queryDemo: {
         url: Config.api.PLANT_DEMO,
         method: 'GET',
         params: {page: 1},
         isArray: true,
-        transformResponse: transformResponse
+        transformResponse: transformResponseList
       }
     });
-    function transformResponse(resp) {
+
+    /**
+     * transform request param to formdata
+     * @private
+     * @param param
+     * @returns {String}
+     */
+    function transformRequest(param) {
+      param.sunlight = param.sunlight ? 1 : 0;
+      param.nosunlight = param.nosunlight ? 1 : 0;
+      param.end_date = moment(param.end_date).format('YYYY-MM-DD');
+
+      return serialParam(param);
+    }
+
+    /**
+     * transform one response
+     * @private
+     * @param resp {Response}
+     * @returns {Object}
+     */
+    function transformResponseOne(resp) {
+      resp = angular.fromJson(resp);
+      resp.sunlight = angular.equals(Number(resp.sunlight), 1);
+      resp.nosunlight = angular.equals(Number(resp.nosunlight), 1);
+      resp.end_date = moment(resp.end_date).toDate();
+      return resp;
+    }
+
+    /**
+     * transform response list
+     * @param resp
+     * @returns {Array}
+     */
+    function transformResponseList(resp) {
       resp = angular.fromJson(resp);
       return resp ? resp.items : [];
     }
@@ -387,7 +463,7 @@
     function Toast(option) {
       var defaults = {
         template: '',
-        delay: 2000,
+        delay: 3000,
         show: false
       };
 
@@ -435,6 +511,25 @@
         return toast.show();
       }
     }
+  }
+
+  function WaterTimeService(Config,$resource,Session){
+    var WaterTime= $resource(Config.api.WATER_TIME+'/:id',{
+      id:'@user_id',
+      access_token:Session.get()
+    },{
+      update:{
+        method:'PUT'
+      }
+    });
+
+    var waterTime=new WaterTime();
+
+    waterTime.init=function(){
+      waterTime.user_id=Session.getSessionUser().id;
+      waterTime.$get();
+    };
+    return waterTime;
   }
 
   function Interceptor($q, $rootScope, Config) {

@@ -25,7 +25,7 @@ angular.module('app.controllers', [])
 
       $ionicPopup.alert({
         title: 'Warning',
-        template: resp.data.message
+        template: resp.data[0].message
       });
       hideLoading();
     });
@@ -37,13 +37,33 @@ angular.module('app.controllers', [])
 
     });
 
+
+
+
+
     function hideLoading() {
       $timeout(function () {
         $ionicLoading.hide();
       }, 0);
     }
 
+
     //$cordovaLocalNotification.scheduler()
+  })
+  .controller('MainCtrl',function($scope,WaterTime,Sign,$toast,$state,Session){
+
+    $scope.currentUser=Session.getSessionUser();
+
+    $scope.signout=function(){
+      Sign.signout()
+        .then(function(resp){
+          $toast.show('Sign out sccess');
+
+          $state.go('login');
+        });
+    };
+
+    WaterTime.init();
   })
   .controller('LoginCtrl', function ($scope, Sign, $state, $toast, $timeout) {
     var account = $scope.account = {};
@@ -62,36 +82,22 @@ angular.module('app.controllers', [])
     }
   })
 
-  .controller('ResetPasswordCtrl', function ($scope, $ionicHistory, Sign, $state) {
-
-    var vm = $scope.account = {};
-
-    //$scope.onFormSubmit = function () {
-    //  Sign.sendEmail(vm.email)
-    //    .then(function (resp) {
-    //      $state.go('passwordCreate')
-    //    });
-    //};
-  })
-
-  .controller('ModifyPasswordCtrl', function ($scope,Sign,$state,$toast) {
+  .controller('PasswordSettingsCtrl', function ($scope,Sign,$state,$ionicPopup) {
     var vm = $scope.vm = {};
 
     $scope.onFormSubmit = function (e) {
       Sign.modifyPassword(vm)
         .then(function(resp){
-          $toast.show('modify password success');
-          $state.go('login');
+          vm.password='';
+          vm.password2='';
+          $ionicPopup.alert({
+            title:'Hint',
+            template:'Password update success,please relogin now'
+          }).then(function(){
+            $state.go('login',{},{location:'replace'});
+          });
         });
     };
-  })
-
-  .controller('PasswordSuccessCtrl', function ($scope) {
-
-  })
-
-  .controller('TermsAndConditionCtrl', function ($scope) {
-
   })
 
   //用户注册
@@ -114,14 +120,15 @@ angular.module('app.controllers', [])
           return Sign.signin({email: resp.email, password: resp.password});
         })
         .then(function (resp) {
-          $state.go('profile');
+          $state.go('main.profileSettings',{toState:'main.tabs.schedule'});
         });
     }
   })
 
-  .controller('ProfileCtrl', function ($scope, Sign, $state, $toast, GeoNames) {
+  .controller('ProfileCtrl', function ($scope, Sign, $state, $toast, Session,$stateParams) {
 
-    var profile = $scope.profile = {};
+    var profile = $scope.profile = angular.extend({},Session.getSessionUser());
+    var toState=$stateParams.toState||'main.tabs.schedule';
 
     $scope.onProfileFormSubmit = onProfileFormSubmit;
 
@@ -131,7 +138,7 @@ angular.module('app.controllers', [])
       Sign.updateProfile(params)
         .then(function (resp) {
           $toast.show('updat profile success');
-          $state.go('main.tabs.schedule')
+          $state.go(toState);
         });
     }
 
@@ -158,97 +165,111 @@ angular.module('app.controllers', [])
 
   })
 
-  .controller('ScheduleCtrl', function ($scope, Schedule) {
-    //Schedule.query();
+  .controller('ScheduleCtrl', function ($scope, Schedule,WaterTime) {
+    $scope.morningSchedules=Schedule.query({water_time:'morning'},function(resp){
+      console.log(resp);
+    });
+
+    $scope.noonSchedules=Schedule.query({water_time:'noon'});
+
+    $scope.afternoonSchedules=Schedule.query({water_time:'afternoon'});
+
+    $scope.WaterTime=WaterTime;
+  })
+
+  .controller('PlantsDemoCtrl', function ($scope, Plant,Cache,$state) {
+    $scope.plantList = Plant.queryDemo();
+
+    $scope.selectDemo=function (plant){
+      Cache.plantDemo=plant;
+      $state.go('main.tabs.plantsAdd',{demoId:plant.id});
+    }
   })
 
   .controller('PlantsCtrl', function ($scope, Plant) {
-    $scope.plantList = Plant.queryDemo(function(resp){
-      console.log($scope.plantList);
-    });
-
+    $scope.plantList = Plant.query();
   })
+  .factory('WaterFrequencyModal',function($ionicModal,WaterTime){
+    return {
+      init:function($scope){
+        $scope.WaterTime=WaterTime;
 
-  .controller('PlantsAddCtrl',function($scope,Plant,$toast,$ionicModal){
+        $ionicModal.fromTemplateUrl('templates/waterFrequency.html', {
+          scope: $scope
+        }).then(function (modal) {
+          $scope.modal = modal;
+        });
+
+        $scope.openModal = function () {
+          $scope.modal.show();
+        };
+
+        $scope.closeModal = function () {
+          $scope.modal.hide();
+        };
+
+        //作用域销毁时，删除modal
+        $scope.$on('$destroy', function () {
+          $scope.modal.remove();
+        });
+      }
+    }
+  })
+  .controller('PlantsAddCtrl',function($scope,Plant,$toast,$ionicModal,Cache,$state,WaterFrequencyModal){
+    var plantDemo=Cache.plantDemo;
+
+    if(!plantDemo){
+      $toast.show('Please select one plant demo first');
+      return $state.go('main.tabs.plantDemo')
+    }
+
     var plant=$scope.plant=new Plant({
+      name:plantDemo.name,
+      image:plantDemo.image,
+      description:plantDemo.description,
+      end_date:moment().add(1,'days').toDate(),
       water_times:3,
-      sunlight:true
+      sunlight:true,
+      nosunlight:false
     });
 
     $scope.vm={
       title:'Add Plants'
     };
 
-    $scope.addPlant=function(){
-      plant.sunlight=plant.sunlight?1:0;
-      plant.nosunlight=plant.nosunlight?1:0;
-
+    $scope.savePlant=function(){
       plant.$save(function(){
+        Cache.plantDemo=null;
         $toast.show('Add plant success');
-        $scope.$ionicGoBack();
+        $state.go('main.tabs.plants',{},{location:'replace'});
       });
     };
 
-    $ionicModal.fromTemplateUrl('templates/waterFrequency.html', {
-      scope: $scope
-    }).then(function (modal) {
-      $scope.modal = modal;
-    });
-
-    $scope.openModal = function () {
-      $scope.modal.show();
-    };
-
-    $scope.closeModal = function () {
-      $scope.modal.hide();
-    };
-
-    //作用域销毁时，删除modal
-    $scope.$on('$destroy', function () {
-      $scope.modal.remove();
-    });
+    WaterFrequencyModal.init($scope);
   })
 
   .controller('PlantGrowthCtrl', function ($scope) {
 
   })
 
-  .controller('PlantDetailsCtrl', function ($scope, $ionicModal,$stateParams,Plant,$toast) {
+  .controller('PlantDetailsCtrl', function ($scope,$stateParams,Plant,$toast,WaterFrequencyModal,$state) {
 
     $scope.vm={
       title:'Plants Details'
     };
 
-    var plant=$scope.plant=new Plant({id:$stateParams.id});
+    var plant=$scope.plant=new Plant({id:$stateParams.id,sunlight:true});
 
     plant.$get();
 
-    $ionicModal.fromTemplateUrl('templates/waterFrequency.html', {
-      scope: $scope
-    }).then(function (modal) {
-      $scope.modal = modal;
-    });
-
-    $scope.openModal = function () {
-      $scope.modal.show();
+    $scope.savePlant=function(){
+      plant.$update(function(){
+        $toast.show('Update plant success');
+        $state.go('main.tabs.plants');
+      });
     };
 
-    $scope.closeModal = function () {
-      $scope.modal.hide();
-    };
-
-    //作用域销毁时，删除modal
-    $scope.$on('$destroy', function () {
-      $scope.modal.remove();
-    });
-    // Execute action on hide modal
-    $scope.$on('modal.hidden', function () {
-      // Execute action
-    });
-    // Execute action on remove modal
-    $scope.$on('modal.removed', function () {
-      // Execute action
-    });
+    WaterFrequencyModal.init($scope);
   })
 
   .controller('PlantGrowthListCtrl', function ($scope) {

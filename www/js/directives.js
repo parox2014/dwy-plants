@@ -3,7 +3,9 @@
 
 
     .directive('repeatPassword', repeatPasswordDirective)
-    .directive('ngGeoNames', ngGeoNamesDirective);
+    .directive('ngGeoNames', ngGeoNamesDirective)
+    .directive('minDate',minDateDirective)
+    .directive('doNotAollowBothFalse',doNotAollowBothFalseDirective);
 
   /**
    * @description 重复密码一致性验证
@@ -86,6 +88,64 @@
             vm.countryDisabled = false;
             scope.countryList = resp;
           });
+      }
+    }
+  }
+
+  function minDateDirective($toast,$parse){
+    return {
+      restrict:'A',
+      require:'?^ngModel',
+      link:function(scope,element,attrs,ngModelCtrl){
+        var minDate=attrs.minDate==='today'||!attrs.minDate?moment():moment(attrs.minDate);
+        var getNgModel=$parse(attrs.ngModel);
+        var setNgModel=getNgModel.assign||angular.noop;
+
+        scope.$watch(getNgModel,function(n,o){
+          if(moment(n).isSameOrBefore(minDate)){
+            $toast.show('The end date must after today');
+            setNgModel(scope,moment(minDate).add(1,'days').toDate());
+          }
+        });
+      }
+    }
+  }
+
+  function doNotAollowBothFalseDirective($parse,$toast){
+    return {
+      restrict:'A',
+      link:function(scope,element,attrs){
+        var getNgModel=$parse(attrs.ngModel);
+        var getCompare=$parse(attrs.doNotAollowBothFalse);
+        var setNgModel=getNgModel.assign||angular.noop;
+        var setCompare=getCompare.assign||angular.noop;
+
+        scope.$watch(getNgModel,function(val){
+          var compare=getCompare(scope);
+
+          var isBothFalse=_compare(val,compare);
+
+          if(isBothFalse){
+            setCompare(scope,true);
+          }
+        });
+
+        scope.$watch(getCompare,function(val){
+          var compare=getNgModel(scope);
+
+          var isBothFalse=_compare(compare,val);
+          if(isBothFalse){
+            setNgModel(scope,true);
+          }
+        });
+
+        function _compare(modelValue,compareValue){
+          if(!modelValue&&!compareValue){
+            $toast.show('do not allow both false');
+            return true;
+          }
+          return false;
+        }
       }
     }
   }

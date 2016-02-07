@@ -8,7 +8,7 @@
       Your Name Here
     </author>
   <content src="index.html"/>
-  <access origin="*"/>
+  <access origin="http://plants.yunzujia.net:8992/"/>
   <preference name="webviewbounce" value="false"/>
   <preference name="UIWebViewBounce" value="false"/>
   <preference name="DisallowOverscroll" value="true"/>

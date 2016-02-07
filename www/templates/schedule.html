@@ -1,40 +1,44 @@
 <ion-view title="Schedule">
-    <ion-content overflow-scroll="true" padding="true" class="has-header">
-        <div>
-            <p>Today's Schedule</p>
-        </div>
-        <div class="list card">
-            <div class="item item-divider">6:30 AM</div>
-            <div class="item item-body">
-                <ion-list>
-                    <ion-item ui-sref="plantDetails({id:1001})" class="item-icon-right">Plant A
-                <i class="icon ion-chevron-right icon-accessory"></i></ion-item>
-                    <ion-item href="#/plantDetail" class="item-icon-right">Plant B
-                <i class="icon ion-chevron-right icon-accessory"></i></ion-item>
-                    <ion-item href="#/plantDetail" class="item-icon-right">Plant C
-                <i class="icon ion-chevron-right icon-accessory"></i></ion-item>
-                </ion-list>
-            </div>
-        </div>
-        <div class="list card">
-            <div class="item item-divider">12:30 PM</div>
-            <div class="item item-body">
-                <ion-list>
-                    <ion-item href="#/plantDetail" class="item-icon-right">Plant A
-                <i class="icon ion-chevron-right icon-accessory"></i></ion-item>
-                    <ion-item href="#/plantDetail" class="item-icon-right">Plant B
-                <i class="icon ion-chevron-right icon-accessory"></i></ion-item>
-                </ion-list>
-            </div>
-        </div>
-        <div class="list card">
-            <div class="item item-divider">6:30 PM</div>
-            <div class="item item-body">
-                <ion-list>
-                    <ion-item href="#/plantDetail" class="item-icon-right">Plant A
-                <i class="icon ion-chevron-right icon-accessory"></i></ion-item>
-                </ion-list>
-            </div>
-        </div>
-    </ion-content>
+  <ion-content overflow-scroll="true" padding="true" class="has-header">
+    <div>
+      <p>Today's Schedule</p>
+    </div>
+    <div class="list card">
+      <div class="item item-divider">{{WaterTime.morning}}</div>
+      <div class="item item-body">
+        <ion-list ng-if="morningSchedules.length>0">
+          <ion-item ng-repeat="schedule in morningSchedules" ui-sref="plantDetails({id:schedule.plant_id})" class="item-icon-right">
+            {{schedule.plant.name}}
+            <i class="icon ion-chevron-right icon-accessory"></i>
+          </ion-item>
+
+        </ion-list>
+
+        <p class="stable padding-bottom" ng-if="morningSchedules.length===0">Today's {{WaterTime.morning}} AM have not schedule</p>
+      </div>
+    </div>
+    <div class="list card">
+      <div class="item item-divider">{{WaterTime.noon}}</div>
+      <div class="item item-body">
+        <ion-list ng-if="noonSchedules.length>0">
+          <ion-item ng-repeat="schedule in noonSchedules" ui-sref="plantDetails({id:schedule.plant_id})" class="item-icon-right">
+            {{schedule.plant.name}}
+            <i class="icon ion-chevron-right icon-accessory"></i>
+          </ion-item>
+        </ion-list>
+        <p class="stable padding-bottom" ng-if="noonSchedules.length===0">Today's {{WaterTime.noon}} PM have not schedule</p>
+      </div>
+    </div>
+    <div class="list card">
+      <div class="item item-divider">{{WaterTime.afternoon}}</div>
+      <div class="item item-body">
+        <ion-list ng-if="afternoonSchedules.length>0">
+          <ion-item ng-repeat="schedule in afternoonSchedules" ui-sref="plantDetails({id:schedule.plant_id})" class="item-icon-right">
+            {{schedule.plant.name}}
+            <i class="icon ion-chevron-right icon-accessory"></i></ion-item>
+        </ion-list>
+        <p class="stable padding-bottom" ng-if="afternoonSchedules.length===0">Today's {{WaterTime.afternoon}} PM have not schedule</p>
+      </div>
+    </div>
+  </ion-content>
 </ion-view>

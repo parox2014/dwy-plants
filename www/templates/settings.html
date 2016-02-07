@@ -1,0 +1,26 @@
+<ion-view view-title="Settings">
+  <ion-header-bar>
+    <button ng-click="$ionicGoBack()" class="button button-icon">
+      <i class="ion-android-arrow-back"></i>
+    </button>
+    <h1 class="title">Settings</h1>
+  </ion-header-bar>
+  <ion-content>
+    <ion-list>
+      <ion-item class="item-icon-right" ui-sref="main.passwordSettings">
+        Password Settings
+        <i class="icon ion-chevron-right icon-small"></i>
+      </ion-item>
+
+      <ion-item class="item-icon-right">
+        Water Time Settings
+        <i class="icon ion-chevron-right icon-small"></i>
+      </ion-item>
+
+      <ion-item class="item-icon-right" ui-sref="main.profileSettings({toState:'main.settings'})">
+        Profile Settings
+        <i class="icon ion-chevron-right icon-small"></i>
+      </ion-item>
+    </ion-list>
+  </ion-content>
+</ion-view>
