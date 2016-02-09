@@ -155,6 +155,16 @@ angular.module('app.routes', [])
             controller: 'ProfileCtrl'
           }
         }
+      })
+
+      .state('main.waterTimeSettings', {
+        url: '/water-time-settings',
+        views:{
+          main:{
+            templateUrl: 'templates/settingsWaterTime.html',
+            controller:'WaterTimeSettingsCtrl'
+          }
+        }
       });
 
     // if none of the above states are matched, use this as the fallback

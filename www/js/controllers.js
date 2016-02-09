@@ -165,10 +165,17 @@ angular.module('app.controllers', [])
 
   })
 
+  .controller('WaterTimeSettingsCtrl',function(WaterTime,$scope){
+    $scope.vm=WaterTime;
+
+    $scope.onFormSubmit=function(){
+      WaterTime.$update(function(resp){
+        console.log(resp);
+      });
+    };
+  })
   .controller('ScheduleCtrl', function ($scope, Schedule,WaterTime) {
-    $scope.morningSchedules=Schedule.query({water_time:'morning'},function(resp){
-      console.log(resp);
-    });
+    $scope.morningSchedules=Schedule.query({water_time:'morning'});
 
     $scope.noonSchedules=Schedule.query({water_time:'noon'});
 
@@ -252,11 +259,13 @@ angular.module('app.controllers', [])
 
   })
 
-  .controller('PlantDetailsCtrl', function ($scope,$stateParams,Plant,$toast,WaterFrequencyModal,$state) {
+  .controller('PlantDetailsCtrl', function ($scope,$stateParams,Plant,$toast,WaterFrequencyModal,$state,WaterTime) {
 
     $scope.vm={
       title:'Plants Details'
     };
+
+    $scope.waterTime=WaterTime;
 
     var plant=$scope.plant=new Plant({id:$stateParams.id,sunlight:true});
 

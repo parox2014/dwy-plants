@@ -29,9 +29,9 @@
         <span ng-switch-when="3">3 per day</span>
       </ion-item>
       <ion-item ng-switch="plant.water_times">
-        <span ng-switch-when="1">6:30 AM</span>
-        <span ng-switch-when="2">6:30 AM, 6:30 PM</span>
-        <span ng-switch-when="3">6:30 AM, 12:30 PM, 6:30 PM</span>
+        <span ng-switch-when="1">{{waterTime.morning|date:'H:mm a'}}</span>
+        <span ng-switch-when="2">{{waterTime.morning|date:'H:mm a'}}, {{waterTime.afternoon|date:'H:mm a'}}</span>
+        <span ng-switch-when="3">{{waterTime.morning|date:'H:mm a'}}, {{waterTime.noon|date:'H:mm a'}}, {{waterTime.afternoon|date:'H:mm a'}}</span>
       </ion-item>
       <ion-item class="item-divider">Notes</ion-item>
       <label class="item item-input">

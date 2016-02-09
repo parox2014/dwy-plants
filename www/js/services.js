@@ -15,6 +15,7 @@
           CHANGE_PASSWORD: BASE + '/user/change-password',
           SCHEDULE: BASE + '/schedules',
           PLANT: BASE + '/plants',
+          GROWTH: BASE + '/growths',
           PLANT_DEMO: BASE + '/plant-demo',
           COUNTRY_JSON: GEO_NAMES_BASE + '/countryInfoJSON',
           CHILDREN_JSON: GEO_NAMES_BASE + '/childrenJSON'
@@ -66,8 +67,8 @@
         localStorage.setItem('user', angular.toJson(userObj));
       };
 
-      Session.updateSessionUser=function(userObj){
-        angular.extend(user,userObj);
+      Session.updateSessionUser = function (userObj) {
+        angular.extend(user, userObj);
         localStorage.setItem('user', angular.toJson(userObj));
       };
 
@@ -109,7 +110,7 @@
     })
     //登录注册服务
     .factory('Sign', SignService)
-    .factory('WaterTime',WaterTimeService)
+    .factory('WaterTime', WaterTimeService)
     //日程
     .factory('Schedule', ScheduleService)
     .factory('Plant', PlantService)
@@ -187,7 +188,7 @@
      * @returns {*}
      */
     function signout() {
-      var defer=$q.defer();
+      var defer = $q.defer();
 
       Session.destroy();
 
@@ -395,7 +396,7 @@
       save: {
         method: 'POST',
         transformRequest: transformRequest,
-        transformResponse:transformResponseOne
+        transformResponse: transformResponseOne
       },
       query: {
         method: 'GET',
@@ -423,9 +424,12 @@
      * @returns {String}
      */
     function transformRequest(param) {
+      var endDate = moment(param.end_date);
+
       param.sunlight = param.sunlight ? 1 : 0;
       param.nosunlight = param.nosunlight ? 1 : 0;
-      param.end_date = moment(param.end_date).format('YYYY-MM-DD');
+      param.end_at = endDate.valueOf();
+      param.end_date = endDate.format('YYYY-MM-DD');
 
       return serialParam(param);
     }
@@ -440,7 +444,8 @@
       resp = angular.fromJson(resp);
       resp.sunlight = angular.equals(Number(resp.sunlight), 1);
       resp.nosunlight = angular.equals(Number(resp.nosunlight), 1);
-      resp.end_date = moment(resp.end_date).toDate();
+      resp.end_date = moment(resp.end_at).toDate();
+      resp.end_at = resp.end_date;
       return resp;
     }
 
@@ -453,6 +458,15 @@
       resp = angular.fromJson(resp);
       return resp ? resp.items : [];
     }
+  }
+
+  function GrowthService(Config, $resource, Session) {
+    return $resource(Config.api.GROWTH+'/:id',{
+      id:'@id',
+      access_token:Session.get()
+    },{
+
+    });
   }
 
   function ToastService($compile, $rootScope, $document, $timeout) {
@@ -513,22 +527,47 @@
     }
   }
 
-  function WaterTimeService(Config,$resource,Session){
-    var WaterTime= $resource(Config.api.WATER_TIME+'/:id',{
-      id:'@user_id',
-      access_token:Session.get()
-    },{
-      update:{
-        method:'PUT'
+  function WaterTimeService(Config, $resource, Session) {
+    var WaterTime = $resource(Config.api.WATER_TIME + '/:id', {
+      id: '@user_id',
+      access_token: Session.get()
+    }, {
+      get: {
+        method: 'GET',
+        isArray: false,
+        transformResponse: tranformResponseOne
+      },
+      update: {
+        method: 'PUT',
+        transformRequest: function (param) {
+          param.morning = moment(param.morning).format('HH:mm');
+          param.noon = moment(param.noon).format('HH:mm');
+          param.afternoon = moment(param.afternoon).format('HH:mm');
+
+          return serialParam(param);
+        },
+        tranformResponse: tranformResponseOne
       }
     });
 
-    var waterTime=new WaterTime();
+    function tranformResponseOne(resp) {
+      var date = moment().format('YYYY-MM-DD');
+      resp = angular.fromJson(resp);
 
-    waterTime.init=function(){
-      waterTime.user_id=Session.getSessionUser().id;
+      resp.morning = moment(date + ' ' + resp.morning, 'YYYY-MM-DD H:mm').toDate();
+      resp.noon = moment(date + ' ' + resp.noon).toDate();
+      resp.afternoon = moment(date + ' ' + resp.afternoon).toDate();
+
+      return resp;
+    }
+
+    var waterTime = new WaterTime();
+
+    WaterTime.prototype.init = function () {
+      waterTime.user_id = Session.getSessionUser().id;
       waterTime.$get();
     };
+
     return waterTime;
   }
 

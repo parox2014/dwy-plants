@@ -4,7 +4,7 @@
       <p>Today's Schedule</p>
     </div>
     <div class="list card">
-      <div class="item item-divider">{{WaterTime.morning}}</div>
+      <div class="item item-divider">{{WaterTime.morning|date:'HH:mm a'}}</div>
       <div class="item item-body">
         <ion-list ng-if="morningSchedules.length>0">
           <ion-item ng-repeat="schedule in morningSchedules" ui-sref="plantDetails({id:schedule.plant_id})" class="item-icon-right">
@@ -18,7 +18,7 @@
       </div>
     </div>
     <div class="list card">
-      <div class="item item-divider">{{WaterTime.noon}}</div>
+      <div class="item item-divider">{{WaterTime.noon|date:'HH:mm a'}}</div>
       <div class="item item-body">
         <ion-list ng-if="noonSchedules.length>0">
           <ion-item ng-repeat="schedule in noonSchedules" ui-sref="plantDetails({id:schedule.plant_id})" class="item-icon-right">
@@ -30,7 +30,7 @@
       </div>
     </div>
     <div class="list card">
-      <div class="item item-divider">{{WaterTime.afternoon}}</div>
+      <div class="item item-divider">{{WaterTime.afternoon|date:'HH:mm a'}}</div>
       <div class="item item-body">
         <ion-list ng-if="afternoonSchedules.length>0">
           <ion-item ng-repeat="schedule in afternoonSchedules" ui-sref="plantDetails({id:schedule.plant_id})" class="item-icon-right">

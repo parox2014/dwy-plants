@@ -62,7 +62,7 @@
         };
 
         scope.$watch('viewModel.country', function (country) {
-          if (!country)return;
+          if (!angular.isObject(country))return;
 
           vm.stateDisabled = true;
           GeoNames.queryProviceList(country.geonameId)
@@ -73,7 +73,7 @@
         }, true);
 
         scope.$watch('viewModel.state', function (state) {
-          if (!state)return;
+          if (!angular.isObject(state))return;
 
           vm.cityDisabled = true;
           GeoNames.queryCityList(state.geonameId)

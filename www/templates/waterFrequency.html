@@ -9,22 +9,22 @@
     <ion-list>
 
       <ion-radio class="item-divider stable-bg" name="schedule" ng-model="plant.water_times" value="3">3 per day</ion-radio>
-      <ion-item>{{WaterTime.morning}} AM</ion-item>
-      <ion-item>{{WaterTime.noon}} PM</ion-item>
-      <ion-item>{{WaterTime.afternoon}} PM</ion-item>
+      <ion-item>{{WaterTime.morning|date:'H:mm a'}}</ion-item>
+      <ion-item>{{WaterTime.noon |date:'H:mm a'}}</ion-item>
+      <ion-item>{{WaterTime.afternoon |date:'H:mm a'}}</ion-item>
     </ion-list>
     <ion-list></ion-list>
     <div class="spacer" style="width: 300px; height: 34px;"></div>
     <ion-list>
       <ion-radio class="item-divider stable-bg" name="schedule" ng-model="plant.water_times" value="2">2 per day</ion-radio>
-      <ion-item>{{WaterTime.morning}} AM</ion-item>
-      <ion-item>{{WaterTime.afternoon}} PM</ion-item>
+      <ion-item>{{WaterTime.morning |date:'H:mm a'}}</ion-item>
+      <ion-item>{{WaterTime.afternoon |date:'H:mm a'}}</ion-item>
 
     </ion-list>
     <div class="spacer" style="width: 300px; height: 34px;"></div>
     <ion-list>
       <ion-radio class="item-divider stable-bg" name="schedule" ng-model="plant.water_times" value="1">Once a day</ion-radio>
-      <ion-item>{{WaterTime.morning}} AM</ion-item>
+      <ion-item>{{WaterTime.morning |date:'H:mm a'}}</ion-item>
     </ion-list>
   </ion-content>
 </ion-modal-view>

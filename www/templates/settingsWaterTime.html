@@ -1,0 +1,28 @@
+<ion-view view-title="Water Time Settings">
+
+  <ion-content>
+    <form name="waterTimeForm" ng-submit="onFormSubmit()" novalidate>
+      <div class="list">
+        <label class="item item-input">
+          <span class="input-label">Morning</span>
+          <input type="time" ng-model="vm.morning">
+        </label>
+
+        <label class="item item-input">
+          <span class="input-label">Noon</span>
+          <input type="time" ng-model="vm.noon">
+        </label>
+
+        <label class="item item-input">
+          <span class="input-label">Afternoon</span>
+          <input type="time" ng-model="vm.afternoon">
+        </label>
+      </div>
+
+      <div class="padding-horizontal">
+        <button class="button button-stable button-block" type="submit">Submit</button>
+      </div>
+
+    </form>
+  </ion-content>
+</ion-view>
