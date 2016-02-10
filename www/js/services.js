@@ -29,7 +29,7 @@
         GEO_NAMES_ACCOUNT: 'plants_schedule'
       }
     })
-    .factory('Session', function ($http) {
+    .factory('Session', function () {
       'use strict';
       var localStorage = window.localStorage;
       var token = localStorage.getItem('token');
@@ -114,6 +114,7 @@
     //日程
     .factory('Schedule', ScheduleService)
     .factory('Plant', PlantService)
+    .factory('Growth', GrowthService)
     .factory('Cache', function () {
       return {}
     })
@@ -437,7 +438,7 @@
     /**
      * transform one response
      * @private
-     * @param resp {Response}
+     * @param resp {Object}
      * @returns {Object}
      */
     function transformResponseOne(resp) {
@@ -461,11 +462,24 @@
   }
 
   function GrowthService(Config, $resource, Session) {
-    return $resource(Config.api.GROWTH+'/:id',{
-      id:'@id',
-      access_token:Session.get()
-    },{
+    return $resource(Config.api.GROWTH, {
+      access_token: Session.get()
+    }, {
+      query: {
+        method: 'GET',
+        isArray: true,
+        transformResponse: function (resp) {
+          resp = angular.fromJson(resp);
 
+          return resp.items;
+        }
+      },
+      save: {
+        method: 'POST',
+        transformRequest:function(){
+
+        }
+      }
     });
   }
 
@@ -564,7 +578,8 @@
     var waterTime = new WaterTime();
 
     WaterTime.prototype.init = function () {
-      waterTime.user_id = Session.getSessionUser().id;
+      var user = Session.getSessionUser();
+      waterTime.user_id = user ? user.id : null;
       waterTime.$get();
     };
 

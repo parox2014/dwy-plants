@@ -83,31 +83,36 @@ angular.module('app.routes', [])
           }
         }
       })
-
-      .state('main.tabs.plantGrowth', {
-        url: '/growth',
-        views: {
-          plantGrowth: {
-            templateUrl: 'templates/plantGrowth.html',
-            controller: 'PlantGrowthCtrl'
-          }
-        }
-      })
-
       .state('plantDetails', {
         url: '/plantDetail/:id',
         cache:false,
         templateUrl: 'templates/plantDetails.html',
         controller: 'PlantDetailsCtrl'
-      })/*.state('main.tabs.plantDetails', {
-        url: '/plantDetail/:id',
-        views:{
-          plants:{
-            templateUrl: 'templates/plantDetails.html',
-            controller: 'PlantDetailsCtrl'
+      })
+
+
+      .state('main.tabs.plantGrowth', {
+        url: '/growth',
+        cache:false,
+        views: {
+          plantGrowth: {
+            templateUrl: 'templates/plants.html',
+            controller: 'PlantGrowthCtrl'
           }
         }
-      })*/
+      })
+
+      .state('main.tabs.plantGrowthDetails', {
+        url: '/growthDetails/:plantId',
+        cache:false,
+        views: {
+          plantGrowth: {
+            templateUrl: 'templates/plantGrowthDetails.html',
+            controller: 'PlantGrowthDetailsCtrl'
+          }
+        }
+      })
+
 
       .state('main.tabs.plantGrowthList', {
         url: '/growthList',
@@ -120,7 +125,7 @@ angular.module('app.routes', [])
       })
 
       .state('main.tabs.growthReading', {
-        url: '/growthReading',
+        url: '/growthReading/:plantId',
         views:{
           plantGrowth:{
             templateUrl: 'templates/growthReading.html',
@@ -152,7 +157,7 @@ angular.module('app.routes', [])
         views:{
           main:{
             templateUrl: 'templates/profile.html',
-            controller: 'ProfileCtrl'
+            controller: 'ProfileSettingsCtrl'
           }
         }
       })

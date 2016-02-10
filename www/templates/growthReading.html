@@ -1,27 +1,35 @@
 <ion-view title="Growth Reading">
-    <ion-content overflow-scroll="true" padding="true" class="has-header">
-        <ion-list>
-            <ion-item class="item-divider item-icon-right">4/21/2016<i class="icon ion-chevron-right icon-accessory"></i></ion-item>
-            <ion-item>
-                <div class="row">
-                    <div class="col">
-                        <div class="list">
-                            <label class="item item-input item-stacked-label">
-                                <span class="input-label">Outdoor</span>
-                                <input type="text" class="growth-reading">
-                            </label>
-                        </div>
-                    </div>
-                    <div class="col">
-                            <label class="item item-input item-stacked-label">
-                                <span class="input-label">Indoor</span>
-                                <input type="text">
-                            </label>
-                    </div>
-                </div>
-            </ion-item>
-        </ion-list>
-        <a href="#/tabs/growth" class="button button-dark button-block ">Submit</a>
-        <a href="#/tabs/growth" class="button button-stable button-block ">Cancel</a>
-    </ion-content>
+  <ion-content overflow-scroll="true" padding="true" class="has-header">
+    <ion-list>
+      <ion-item class="item-divider item-icon-right item-input">
+        <input type="date" ng-model="growth.date">
+        <i class="icon ion-chevron-right icon-accessory"></i>
+      </ion-item>
+      <ion-item>
+        <div class="row">
+          <div class="col">
+            <div class="list">
+              <label class="item item-input item-stacked-label">
+                <span class="input-label">Sunlight</span>
+                <input ng-disabled="plant.sunlight==0"
+                       ng-model="growth.sunlight"
+                       type="text"
+                       class="growth-reading">
+              </label>
+            </div>
+          </div>
+          <div class="col">
+            <label class="item item-input item-stacked-label">
+              <span class="input-label">NoSunlight</span>
+              <input ng-disabled="plant.nosunlight==0"
+                     ng-model="growth.nosunlight"
+                     type="text">
+            </label>
+          </div>
+        </div>
+      </ion-item>
+    </ion-list>
+    <button ng-click="addNewGrowthReading()" class="button button-dark button-block ">Submit</button>
+    <button ng-click="$ionicGoBack()" class="button button-stable button-block ">Cancel</button>
+  </ion-content>
 </ion-view>

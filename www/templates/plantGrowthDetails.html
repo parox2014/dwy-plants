@@ -1,0 +1,46 @@
+<ion-view title="Plant Growth">
+  <ion-content overflow-scroll="true" padding="true" class="has-header">
+    <div
+      style="border: 1px solid rgb(238, 238, 238);
+      border-radius: 3px;
+      text-align: center;
+      width: 100%;
+      background-color: rgb(255, 255, 255);">
+
+      <i class="icon ion-image"
+         ng-if="!plant.image"
+         style="font-size: 64px; color: rgb(136, 136, 136); vertical-align: middle;"></i>
+
+      <img ng-if="plant.image" ng-src="{{plant.image}}" style="width: 100%">
+    </div>
+    <ion-list>
+      <ion-item class="item-divider">
+        <div class="row">
+          <div class="col">Date</div>
+          <div class="col">Sunlight</div>
+          <div class="col">NoSunlight</div>
+        </div>
+      </ion-item>
+
+      <ion-item ng-if="growthList.length>0"
+        ng-repeat="growth in growthList">
+        <div class="row">
+          <div class="col">{{growth.date|date:'YYYY-MM-DD'}}</div>
+          <div class="col">{{growth.sunlight}}</div>
+          <div class="col">{{growth.nosunlight}}</div>
+        </div>
+      </ion-item>
+
+      <ion-item ng-if="growthList.length===0">
+        Have no growth today,please add new
+      </ion-item>
+    </ion-list>
+
+    <ion-list>
+      <ion-item ui-sref="main.tabs.plantGrowthList" class="item-icon-right">Previous readings
+        <i class="icon ion-chevron-right icon-accessory"></i>
+      </ion-item>
+    </ion-list>
+    <a ui-sref="main.tabs.growthReading({plantId:plant.id})" class="button button-dark button-block">New Reading</a>
+  </ion-content>
+</ion-view>

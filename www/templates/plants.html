@@ -1,12 +1,19 @@
-<ion-view title="Plants">
+<ion-view title="{{vm.viewTitle}}">
   <ion-content overflow-scroll="true" padding="true" class="has-header">
     <form class="list"></form>
     <ion-list>
-      <label class="item item-input">
-        <i class="icon ion-search placeholder-icon"></i>
-        <input type="search" placeholder="">
-      </label>
-      <ion-item ng-repeat="plant in plantList" ui-sref="plantDetails({id:plant.id})" class="item-icon-right">
+      <ion-item ng-if="vm.viewTitle==='Plant'"
+                ng-repeat="plant in plantList"
+                ui-sref="plantDetails({id:plant.id})"
+                class="item-icon-right">
+        {{plant.name}}
+        <i class="icon ion-chevron-right icon-accessory"></i>
+      </ion-item>
+
+      <ion-item ng-if="vm.viewTitle!=='Plant'"
+                ng-repeat="plant in plantList"
+                ui-sref="main.tabs.plantGrowthDetails({plantId:plant.id})"
+                class="item-icon-right">
         {{plant.name}}
         <i class="icon ion-chevron-right icon-accessory"></i>
       </ion-item>

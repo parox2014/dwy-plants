@@ -56,7 +56,7 @@ angular.module('app.controllers', [])
 
     $scope.signout=function(){
       Sign.signout()
-        .then(function(resp){
+        .then(function(){
           $toast.show('Sign out sccess');
 
           $state.go('login');
@@ -70,7 +70,7 @@ angular.module('app.controllers', [])
 
     $scope.onFormSubmit = onFormSubmit;
 
-    function onFormSubmit(e) {
+    function onFormSubmit() {
       Sign.signin(account)
         .then(function () {
           $toast.show('Login Sucess');
@@ -81,25 +81,6 @@ angular.module('app.controllers', [])
         });
     }
   })
-
-  .controller('PasswordSettingsCtrl', function ($scope,Sign,$state,$ionicPopup) {
-    var vm = $scope.vm = {};
-
-    $scope.onFormSubmit = function (e) {
-      Sign.modifyPassword(vm)
-        .then(function(resp){
-          vm.password='';
-          vm.password2='';
-          $ionicPopup.alert({
-            title:'Hint',
-            template:'Password update success,please relogin now'
-          }).then(function(){
-            $state.go('login',{},{location:'replace'});
-          });
-        });
-    };
-  })
-
   //用户注册
   .controller('RegisterCtrl', function ($scope, Sign, $state) {
     var account = $scope.account = {
@@ -119,13 +100,13 @@ angular.module('app.controllers', [])
 
           return Sign.signin({email: resp.email, password: resp.password});
         })
-        .then(function (resp) {
+        .then(function () {
           $state.go('main.profileSettings',{toState:'main.tabs.schedule'});
         });
     }
   })
 
-  .controller('ProfileCtrl', function ($scope, Sign, $state, $toast, Session,$stateParams) {
+  .controller('ProfileSettingsCtrl', function ($scope, Sign, $state, $toast, Session,$stateParams) {
 
     var profile = $scope.profile = angular.extend({},Session.getSessionUser());
     var toState=$stateParams.toState||'main.tabs.schedule';
@@ -133,10 +114,10 @@ angular.module('app.controllers', [])
     $scope.onProfileFormSubmit = onProfileFormSubmit;
 
 
-    function onProfileFormSubmit(e) {
+    function onProfileFormSubmit() {
       var params=handleParam();
       Sign.updateProfile(params)
-        .then(function (resp) {
+        .then(function () {
           $toast.show('updat profile success');
           $state.go(toState);
         });
@@ -174,6 +155,24 @@ angular.module('app.controllers', [])
       });
     };
   })
+
+  .controller('PasswordSettingsCtrl', function ($scope,Sign,$state,$ionicPopup) {
+    var vm = $scope.vm = {};
+
+    $scope.onFormSubmit = function () {
+      Sign.modifyPassword(vm)
+        .then(function(){
+          vm.password='';
+          vm.password2='';
+          $ionicPopup.alert({
+            title:'Hint',
+            template:'Password update success,please relogin now'
+          }).then(function(){
+            $state.go('login',{},{location:'replace'});
+          });
+        });
+    };
+  })
   .controller('ScheduleCtrl', function ($scope, Schedule,WaterTime) {
     $scope.morningSchedules=Schedule.query({water_time:'morning'});
 
@@ -194,8 +193,33 @@ angular.module('app.controllers', [])
   })
 
   .controller('PlantsCtrl', function ($scope, Plant) {
+    $scope.vm={
+      viewTitle:'Plant'
+    };
     $scope.plantList = Plant.query();
   })
+  .controller('PlantDetailsCtrl', function ($scope,$stateParams,Plant,$toast,WaterFrequencyModal,$state,WaterTime) {
+
+    $scope.vm={
+      title:'Plants Details'
+    };
+
+    $scope.waterTime=WaterTime;
+
+    var plant=$scope.plant=new Plant({id:$stateParams.id,sunlight:true});
+
+    plant.$get();
+
+    $scope.savePlant=function(){
+      plant.$update(function(){
+        $toast.show('Update plant success');
+        $state.go('main.tabs.plants');
+      });
+    };
+
+    WaterFrequencyModal.init($scope);
+  })
+
   .factory('WaterFrequencyModal',function($ionicModal,WaterTime){
     return {
       init:function($scope){
@@ -255,36 +279,39 @@ angular.module('app.controllers', [])
     WaterFrequencyModal.init($scope);
   })
 
-  .controller('PlantGrowthCtrl', function ($scope) {
-
-  })
-
-  .controller('PlantDetailsCtrl', function ($scope,$stateParams,Plant,$toast,WaterFrequencyModal,$state,WaterTime) {
-
+  .controller('PlantGrowthCtrl', function ($scope,Growth,Plant) {
     $scope.vm={
-      title:'Plants Details'
+      viewTitle:'PlantGrowth'
     };
-
-    $scope.waterTime=WaterTime;
-
-    var plant=$scope.plant=new Plant({id:$stateParams.id,sunlight:true});
-
-    plant.$get();
-
-    $scope.savePlant=function(){
-      plant.$update(function(){
-        $toast.show('Update plant success');
-        $state.go('main.tabs.plants');
-      });
-    };
-
-    WaterFrequencyModal.init($scope);
+    $scope.plantList=Plant.query();
   })
+  .controller('PlantGrowthDetailsCtrl', function ($scope,Growth,Plant,$stateParams) {
+    var plantId=$stateParams.plantId;
+
+    $scope.growthList=Growth.query({
+      plant_id:plantId,
+      date:moment().format('YYYY-MM-DD')
+    });
+
+    $scope.plant=Plant.get({id:plantId});
+  })
+
 
   .controller('PlantGrowthListCtrl', function ($scope) {
 
   })
 
-  .controller('GrowthReadingCtrl', function ($scope) {
+  .controller('GrowthReadingCtrl', function ($scope,$stateParams,Growth,Plant) {
+    var plantId=$stateParams.plantId;
+    var growth=$scope.growth=new Growth({
+      date:new Date(),
+      plant_id:plantId
+    });
+
+    $scope.plant=Plant.get({id:plantId});
+
+    $scope.addNewGrowthReading=function(){
+
+    };
 
   });
