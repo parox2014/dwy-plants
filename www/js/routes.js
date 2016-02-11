@@ -83,11 +83,15 @@ angular.module('app.routes', [])
           }
         }
       })
-      .state('plantDetails', {
+      .state('main.tabs.plantDetails', {
         url: '/plantDetail/:id',
         cache:false,
-        templateUrl: 'templates/plantDetails.html',
-        controller: 'PlantDetailsCtrl'
+        views:{
+          plants:{
+            templateUrl: 'templates/plantDetails.html',
+            controller: 'PlantDetailsCtrl'
+          }
+        }
       })
 
 
@@ -115,7 +119,7 @@ angular.module('app.routes', [])
 
 
       .state('main.tabs.plantGrowthList', {
-        url: '/growthList',
+        url: '/growthList/:plantId',
         views:{
           plantGrowth:{
             templateUrl: 'templates/plantGrowthList.html',

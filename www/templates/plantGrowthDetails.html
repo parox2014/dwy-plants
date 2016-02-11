@@ -25,7 +25,7 @@
       <ion-item ng-if="growthList.length>0"
         ng-repeat="growth in growthList">
         <div class="row">
-          <div class="col">{{growth.date|date:'YYYY-MM-DD'}}</div>
+          <div class="col">{{growth.date}}</div>
           <div class="col">{{growth.sunlight}}</div>
           <div class="col">{{growth.nosunlight}}</div>
         </div>
@@ -37,7 +37,7 @@
     </ion-list>
 
     <ion-list>
-      <ion-item ui-sref="main.tabs.plantGrowthList" class="item-icon-right">Previous readings
+      <ion-item ui-sref="main.tabs.plantGrowthList({plantId:plant.id})" class="item-icon-right">Previous readings
         <i class="icon ion-chevron-right icon-accessory"></i>
       </ion-item>
     </ion-list>

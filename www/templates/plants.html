@@ -4,12 +4,15 @@
     <ion-list>
       <ion-item ng-if="vm.viewTitle==='Plant'"
                 ng-repeat="plant in plantList"
-                ui-sref="plantDetails({id:plant.id})"
+                ui-sref="main.tabs.plantDetails({id:plant.id})"
                 class="item-icon-right">
         {{plant.name}}
         <i class="icon ion-chevron-right icon-accessory"></i>
       </ion-item>
 
+      <ion-item ng-if="vm.viewTitle!=='Plant'">
+        select plant to view growth
+      </ion-item>
       <ion-item ng-if="vm.viewTitle!=='Plant'"
                 ng-repeat="plant in plantList"
                 ui-sref="main.tabs.plantGrowthDetails({plantId:plant.id})"

@@ -2,7 +2,7 @@
   angular
     .module('app.services', ['ngResource'])
     .factory('Config', function () {
-      var BASE = 'http://plants.yunzujia.net:8992/v1';
+      var BASE = 'http://plants.yunzujia.net/v1';
       var GEO_NAMES_BASE = 'http://api.geonames.org';
       return {
         api: {
@@ -29,6 +29,7 @@
         GEO_NAMES_ACCOUNT: 'plants_schedule'
       }
     })
+    .factory('Notification', NotificationService)
     .factory('Session', function () {
       'use strict';
       var localStorage = window.localStorage;
@@ -123,7 +124,7 @@
     .factory('$toast', ToastService)
     //请求拦截器
     .factory('Interceptor', Interceptor)
-    .config(function ($locationProvider, $httpProvider) {
+    .config(function ($locationProvider, $httpProvider, $ionicConfigProvider) {
       //$locationProvider.hashPrefix('!');
       //设置ajax请求拦截器
       $httpProvider.interceptors.push('Interceptor');
@@ -135,6 +136,8 @@
       $httpProvider.defaults.headers.put['Content-Type'] = 'application/x-www-form-urlencoded';
 
       $httpProvider.defaults.transformRequest = serialParam;
+
+      $ionicConfigProvider.tabs.position('bottom');
     });
 
   function serialParam(param) {
@@ -374,11 +377,23 @@
         isArray: true,
         transformResponse: function (resp) {
           resp = angular.fromJson(resp);
+          angular.forEach(resp, function (item) {
+            item.is_done = item.is_done == 1;
+          });
           return resp.items;
         }
       },
-      update: {
-        method: 'PUT'
+      toggleDone: {
+        url: Config.api.SCHEDULE + '/:id/done',
+        method: 'POST',
+        transformRequest: function (param) {
+          return '';
+        },
+        transformResponse: function (resp) {
+          resp = angular.fromJson(resp);
+
+          resp.is_done = resp.is_done == 1;
+        }
       }
     })
   }
@@ -426,13 +441,14 @@
      */
     function transformRequest(param) {
       var endDate = moment(param.end_date);
+      var _param = angular.copy(param);
 
-      param.sunlight = param.sunlight ? 1 : 0;
-      param.nosunlight = param.nosunlight ? 1 : 0;
-      param.end_at = endDate.valueOf();
-      param.end_date = endDate.format('YYYY-MM-DD');
+      _param.sunlight = param.sunlight ? 1 : 0;
+      _param.nosunlight = param.nosunlight ? 1 : 0;
+      _param.end_at = endDate.valueOf();
+      _param.end_date = endDate.format('YYYY-MM-DD');
 
-      return serialParam(param);
+      return serialParam(_param);
     }
 
     /**
@@ -445,8 +461,7 @@
       resp = angular.fromJson(resp);
       resp.sunlight = angular.equals(Number(resp.sunlight), 1);
       resp.nosunlight = angular.equals(Number(resp.nosunlight), 1);
-      resp.end_date = moment(resp.end_at).toDate();
-      resp.end_at = resp.end_date;
+      resp.end_date = moment(resp.end_date).toDate();
       return resp;
     }
 
@@ -476,8 +491,18 @@
       },
       save: {
         method: 'POST',
-        transformRequest:function(){
+        transformRequest: function (param) {
+          var _param = angular.copy(param);
+          _param.date = moment(param.date).format('YYYY-MM-DD');
+          _param.user_id = Session.getSessionUser().id;
 
+          return serialParam(_param);
+        },
+        transformResponse: function (resp) {
+          resp = angular.fromJson(resp);
+
+          resp.date = moment(resp.date).toDate();
+          return resp;
         }
       }
     });
@@ -554,11 +579,12 @@
       update: {
         method: 'PUT',
         transformRequest: function (param) {
-          param.morning = moment(param.morning).format('HH:mm');
-          param.noon = moment(param.noon).format('HH:mm');
-          param.afternoon = moment(param.afternoon).format('HH:mm');
+          var _param = angular.copy(param);
+          _param.morning = moment(param.morning).format('HH:mm');
+          _param.noon = moment(param.noon).format('HH:mm');
+          _param.afternoon = moment(param.afternoon).format('HH:mm');
 
-          return serialParam(param);
+          return serialParam(_param);
         },
         tranformResponse: tranformResponseOne
       }
@@ -584,6 +610,117 @@
     };
 
     return waterTime;
+  }
+
+  function NotificationService($cordovaLocalNotification, Schedule, $toast) {
+
+
+    return {
+      init: function () {
+
+        $cordovaLocalNotification
+          .hasPermission()
+          .then(function (granted) {
+            //if has permisson ,query schedules and set local notification
+            //if has no,registerPermission
+            if (granted) {
+              var schedule = {
+                id: 123,
+                date:moment().format('YYYY-MM-DD'),
+                at: moment().add(2,'minutes').format('HH:mm'),
+                plant:{
+                  name:'富贵竹'
+                },
+                title: "Water Notify"
+              };
+
+              addOne(schedule);
+              //querySchedulesAndSetLocalNotifications();
+            } else {
+              $cordovaLocalNotification
+                .registerPermission()
+                .then(function (_granted) {
+                  if (_granted) {
+                    querySchedulesAndSetLocalNotifications();
+                  }
+                });
+            }
+
+          });
+
+      }
+    };
+
+    function querySchedulesAndSetLocalNotifications() {
+      Schedule.query({time: 'future', water_time: 'morning'}, function (resp) {
+        addNotification(resp);
+      });
+
+      Schedule.query({time: 'future', water_time: 'noon'}, function (resp) {
+        addNotification(resp);
+      });
+
+      Schedule.query({time: 'future', water_time: 'afternoon'}, function (resp) {
+        addNotification(resp);
+      });
+    }
+
+    function addNotification(schedules) {
+      if (schedules.length == 0)return;
+
+      angular.forEach(schedules, addOne);
+
+    }
+
+    function addOne(schedule) {
+      var id = schedule.id;
+
+      var param = {
+        id: id,
+        at: moment(schedule.date + ' ' + schedule.at).toDate(),
+        text: schedule.plant.name + " need water",
+        title: "Water Notify"
+      };
+
+      $cordovaLocalNotification
+        .isScheduled(id)
+        .then(function (isScheduled) {
+
+          //首先判断该日程是否设置了提醒
+          //如果没有设置，则设置提醒
+          if (isScheduled) {
+            $cordovaLocalNotification
+              .isTriggered(id)
+              .then(function (isTriggered) {
+
+                //如果已经设置了提醒，则看是否已经触发过
+                //如果已经触发过了，则清除该提醒
+                //如果没有触发过，则更新该提醒
+                if (isTriggered) {
+                  $cordovaLocalNotification
+                    .clear(id)
+                    .then(function () {
+                      alert('The notification:' + id + 'has been cleared');
+                    });
+                } else {
+
+                  $cordovaLocalNotification
+                    .update(param)
+                    .then(function () {
+                      alert("The notification has been updated");
+                    });
+                }
+              });
+
+          } else {
+            $cordovaLocalNotification
+              .schedule(param)
+              .then(function () {
+                alert("The notification has been set");
+              });
+          }
+        });
+    }
   }
 
   function Interceptor($q, $rootScope, Config) {

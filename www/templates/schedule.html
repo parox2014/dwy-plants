@@ -3,41 +3,49 @@
     <div>
       <p>Today's Schedule</p>
     </div>
-    <div class="list card">
-      <div class="item item-divider">{{WaterTime.morning|date:'HH:mm a'}}</div>
+    <div class="card">
+      <div class="item item-divider">{{WaterTime.morning|date:'HH:mm a'}} </div>
       <div class="item item-body">
         <ion-list ng-if="morningSchedules.length>0">
-          <ion-item ng-repeat="schedule in morningSchedules" ui-sref="plantDetails({id:schedule.plant_id})" class="item-icon-right">
+          <ion-checkbox class="checkbox-balanced"
+                        ng-change="onIsDoneChange(schedule)"
+                        ng-model="schedule.is_done"
+                        ng-repeat="schedule in morningSchedules">
             {{schedule.plant.name}}
-            <i class="icon ion-chevron-right icon-accessory"></i>
-          </ion-item>
-
+          </ion-checkbox>
         </ion-list>
 
-        <p class="stable padding-bottom" ng-if="morningSchedules.length===0">Today's {{WaterTime.morning}} AM have not schedule</p>
+        <p class="stable padding-bottom" ng-if="morningSchedules.length===0">Today's {{WaterTime.morning|date:'H:mm a'}} have not schedule</p>
       </div>
     </div>
     <div class="list card">
       <div class="item item-divider">{{WaterTime.noon|date:'HH:mm a'}}</div>
       <div class="item item-body">
         <ion-list ng-if="noonSchedules.length>0">
-          <ion-item ng-repeat="schedule in noonSchedules" ui-sref="plantDetails({id:schedule.plant_id})" class="item-icon-right">
+
+          <ion-checkbox class="checkbox-balanced"
+                        ng-change="onIsDoneChange(schedule)"
+                        ng-model="schedule.is_done"
+                        ng-repeat="schedule in noonSchedules">
             {{schedule.plant.name}}
-            <i class="icon ion-chevron-right icon-accessory"></i>
-          </ion-item>
+          </ion-checkbox>
         </ion-list>
-        <p class="stable padding-bottom" ng-if="noonSchedules.length===0">Today's {{WaterTime.noon}} PM have not schedule</p>
+        <p class="stable padding-bottom" ng-if="noonSchedules.length===0">Today's {{WaterTime.noon|date:'H:mm a'}} have not schedule</p>
       </div>
     </div>
     <div class="list card">
       <div class="item item-divider">{{WaterTime.afternoon|date:'HH:mm a'}}</div>
       <div class="item item-body">
         <ion-list ng-if="afternoonSchedules.length>0">
-          <ion-item ng-repeat="schedule in afternoonSchedules" ui-sref="plantDetails({id:schedule.plant_id})" class="item-icon-right">
+
+          <ion-checkbox class="checkbox-balanced"
+                        ng-change="onIsDoneChange(schedule)"
+                        ng-model="schedule.is_done"
+                        ng-repeat="schedule in afternoonSchedules">
             {{schedule.plant.name}}
-            <i class="icon ion-chevron-right icon-accessory"></i></ion-item>
+          </ion-checkbox>
         </ion-list>
-        <p class="stable padding-bottom" ng-if="afternoonSchedules.length===0">Today's {{WaterTime.afternoon}} PM have not schedule</p>
+        <p class="stable padding-bottom" ng-if="afternoonSchedules.length===0">Today's {{WaterTime.afternoon|date:'H:mm a'}} have not schedule</p>
       </div>
     </div>
   </ion-content>
