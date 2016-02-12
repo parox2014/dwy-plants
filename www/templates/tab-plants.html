@@ -1,10 +1,18 @@
 <ion-view title="{{vm.viewTitle}}">
+
+  <ion-nav-buttons side="right">
+    <button ui-sref="tab.plantDemo"
+            ng-if="vm.viewTitle==='Plant'"
+            class="button button-icon button-small">
+      <i class="icon ion-plus"></i>
+    </button>
+  </ion-nav-buttons>
   <ion-content overflow-scroll="true" padding="true" class="has-header">
     <form class="list"></form>
     <ion-list>
       <ion-item ng-if="vm.viewTitle==='Plant'"
                 ng-repeat="plant in plantList"
-                ui-sref="main.tabs.plantDetails({id:plant.id})"
+                ui-sref="tab.plantDetails({id:plant.id})"
                 class="item-icon-right">
         {{plant.name}}
         <i class="icon ion-chevron-right icon-accessory"></i>
@@ -15,11 +23,15 @@
       </ion-item>
       <ion-item ng-if="vm.viewTitle!=='Plant'"
                 ng-repeat="plant in plantList"
-                ui-sref="main.tabs.plantGrowthDetails({plantId:plant.id})"
+                ui-sref="tab.growthDetails({plantId:plant.id})"
                 class="item-icon-right">
         {{plant.name}}
         <i class="icon ion-chevron-right icon-accessory"></i>
       </ion-item>
+
+      <p style="margin-top: 100px;" class="text-center" ng-if="plantList.length===0">
+        Have not plants,please add
+      </p>
     </ion-list>
   </ion-content>
 </ion-view>

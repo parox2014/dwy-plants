@@ -7,20 +7,28 @@
   </ion-header-bar>
   <ion-content>
     <ion-list>
-      <ion-item class="item-icon-right" ui-sref="main.passwordSettings">
+      <ion-item class="item-icon-left">
+        <i class="icon ion-person"></i>
+        <span ng-bind="fullName()"></span>
+      </ion-item>
+
+      <ion-item class="item-icon-right" ui-sref="tab.passwordSettings">
         Password Settings
         <i class="icon ion-chevron-right icon-small"></i>
       </ion-item>
 
-      <ion-item class="item-icon-right" ui-sref="main.waterTimeSettings">
+      <ion-item class="item-icon-right" ui-sref="tab.waterTimeSettings">
         Water Time Settings
         <i class="icon ion-chevron-right icon-small"></i>
       </ion-item>
 
-      <ion-item class="item-icon-right" ui-sref="main.profileSettings({toState:'main.settings'})">
+      <ion-item class="item-icon-right" ui-sref="tab.profileSettings({toState:'tab.settings'})">
         Profile Settings
         <i class="icon ion-chevron-right icon-small"></i>
       </ion-item>
     </ion-list>
+    <div class="padding">
+      <button class="button button-assertive button-block" ng-click="signout()">Log Out</button>
+    </div>
   </ion-content>
 </ion-view>

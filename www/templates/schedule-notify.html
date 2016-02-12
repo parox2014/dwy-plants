@@ -1,0 +1,16 @@
+<ion-modal-view>
+  <ion-content class="padding">
+    <div class="text-center padding">
+      <i class="icon ion-ios-bell icon-small" style="font-size: 120px;"></i>
+    </div>
+
+    <h1 class="text-center">{{schedule.at}}</h1>
+
+    <p>Water the following plants</p>
+    <ion-list>
+      <ion-checkbox ng-change="onIsDoneChange()" ng-model="schedule.is_done">{{schedule.plant.name}}</ion-checkbox>
+    </ion-list>
+
+    <button ng-click="hideModal()" class="button button-stable button-block">SNOOZE</button>
+  </ion-content>
+</ion-modal-view>

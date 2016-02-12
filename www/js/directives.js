@@ -1,7 +1,5 @@
 (function () {
   angular.module('app.directives', [])
-
-
     .directive('repeatPassword', repeatPasswordDirective)
     .directive('ngGeoNames', ngGeoNamesDirective)
     .directive('minDate',minDateDirective)
@@ -50,7 +48,7 @@
   function ngGeoNamesDirective(GeoNames) {
     return {
       restrict: 'E',
-      templateUrl: 'templates/geoNames.html',
+      templateUrl: 'templates/geo-names.html',
       scope: {
         viewModel: '='
       },

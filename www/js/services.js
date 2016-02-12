@@ -1,114 +1,9 @@
 (function () {
   angular
     .module('app.services', ['ngResource'])
-    .factory('Config', function () {
-      var BASE = 'http://plants.yunzujia.net/v1';
-      var GEO_NAMES_BASE = 'http://api.geonames.org';
-      return {
-        api: {
-          SIGNIN: BASE + '/user/login',
-          SIGNOUT: '/signout',
-          SIGNUP: BASE + '/user/signup',
-          PROFILE: BASE + '/user/update',
-          MY_PROFILE: BASE + '/user/me',
-          WATER_TIME: BASE + '/water-times',
-          CHANGE_PASSWORD: BASE + '/user/change-password',
-          SCHEDULE: BASE + '/schedules',
-          PLANT: BASE + '/plants',
-          GROWTH: BASE + '/growths',
-          PLANT_DEMO: BASE + '/plant-demo',
-          COUNTRY_JSON: GEO_NAMES_BASE + '/countryInfoJSON',
-          CHILDREN_JSON: GEO_NAMES_BASE + '/childrenJSON'
-        },
-        events: {
-          REQUEST_START: '$requestStart',
-          REQUEST_ERROR: '$requestError',
-          RESPONSE_ERROR: '$responseError',
-          RESPONSE: '$response'
-        },
-        GEO_NAMES_ACCOUNT: 'plants_schedule'
-      }
-    })
+    .factory('Config', Config)
     .factory('Notification', NotificationService)
-    .factory('Session', function () {
-      'use strict';
-      var localStorage = window.localStorage;
-      var token = localStorage.getItem('token');
-      var user = angular.fromJson(localStorage.getItem('user'));
-
-      if (token) {
-        setAuthorization(token);
-      }
-
-      var Session = {};
-
-      Session.set = function (value) {
-        if (!angular.isString(value)) {
-          throw new Error('token must be string')
-        }
-
-        if (value.length < 10) {
-          throw new Error('token\'s length invalid');
-        }
-        //save the access token,and save to localStorage
-        token = value;
-        this._saveToLocalstorage(value);
-
-        setAuthorization(value);
-      };
-
-
-      Session.get = function () {
-        return token;
-      };
-
-      Session.setSessionUser = function (userObj) {
-        user = userObj;
-
-        localStorage.setItem('user', angular.toJson(userObj));
-      };
-
-      Session.updateSessionUser = function (userObj) {
-        angular.extend(user, userObj);
-        localStorage.setItem('user', angular.toJson(userObj));
-      };
-
-      Session.getSessionUser = function () {
-        return user;
-      };
-
-      Session.isLogin = function () {
-        return !!token;
-      };
-      /**
-       * 销毁session
-       */
-      Session.destroy = function () {
-        token = null;
-        user = null;
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-      };
-
-      Session._saveToLocalstorage = function (token) {
-        localStorage.setItem('token', token);
-      };
-
-      /**
-       * 获取token参数
-       * @returns {{token}}
-       */
-      Session.getTokenParam = function () {
-        return {access_token: token};
-      };
-
-
-      function setAuthorization(token) {
-        //$http.defaults.headers.common['Authorization']='Basic '+token;
-      }
-
-      return Session;
-    })
+    .factory('Session', Session)
     //登录注册服务
     .factory('Sign', SignService)
     .factory('WaterTime', WaterTimeService)
@@ -122,34 +17,106 @@
     //地区服务
     .factory('GeoNames', GeoNamesService)
     .factory('$toast', ToastService)
+    .factory('ScheduleNotification', ScheduleNotification)
     //请求拦截器
-    .factory('Interceptor', Interceptor)
-    .config(function ($locationProvider, $httpProvider, $ionicConfigProvider) {
-      //$locationProvider.hashPrefix('!');
-      //设置ajax请求拦截器
-      $httpProvider.interceptors.push('Interceptor');
-      //配置请求头
-      //$httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+    .factory('Interceptor', Interceptor);
 
-      $httpProvider.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
-
-      $httpProvider.defaults.headers.put['Content-Type'] = 'application/x-www-form-urlencoded';
-
-      $httpProvider.defaults.transformRequest = serialParam;
-
-      $ionicConfigProvider.tabs.position('bottom');
-    });
-
-  function serialParam(param) {
-    var paramArr = [];
-
-    for (var key in param) {
-      if (param.hasOwnProperty(key)) {
-        paramArr.push(key + '=' + param[key]);
-      }
+  function Config() {
+    var BASE = 'http://plants.yunzujia.net/v1';
+    var GEO_NAMES_BASE = 'http://api.geonames.org';
+    return {
+      api: {
+        SIGNIN: BASE + '/user/login',
+        SIGNOUT: '/signout',
+        SIGNUP: BASE + '/user/signup',
+        PROFILE: BASE + '/user/update',
+        MY_PROFILE: BASE + '/user/me',
+        WATER_TIME: BASE + '/water-times',
+        CHANGE_PASSWORD: BASE + '/user/change-password',
+        SCHEDULE: BASE + '/schedules',
+        PLANT: BASE + '/plants',
+        GROWTH: BASE + '/growths',
+        PLANT_DEMO: BASE + '/plant-demo',
+        COUNTRY_JSON: GEO_NAMES_BASE + '/countryInfoJSON',
+        CHILDREN_JSON: GEO_NAMES_BASE + '/childrenJSON'
+      },
+      events: {
+        REQUEST_START: '$requestStart',
+        REQUEST_ERROR: '$requestError',
+        RESPONSE_ERROR: '$responseError',
+        RESPONSE: '$response'
+      },
+      GEO_NAMES_ACCOUNT: 'plants_schedule'
     }
+  }
 
-    return paramArr.join('&');
+  function Session() {
+    'use strict';
+    var localStorage = window.localStorage;
+    var token = localStorage.getItem('token');
+    var user = angular.fromJson(localStorage.getItem('user'));
+
+    var Session = {};
+
+    Session.set = function (value) {
+      if (!angular.isString(value)) {
+        throw new Error('token must be string')
+      }
+
+      if (value.length < 10) {
+        throw new Error('token\'s length invalid');
+      }
+      //save the access token,and save to localStorage
+      token = value;
+      this._saveToLocalstorage(value);
+    };
+
+
+    Session.get = function () {
+      return token;
+    };
+
+    Session.setSessionUser = function (userObj) {
+      user = userObj;
+
+      localStorage.setItem('user', angular.toJson(userObj));
+    };
+
+    Session.updateSessionUser = function (userObj) {
+      angular.extend(user, userObj);
+      localStorage.setItem('user', angular.toJson(userObj));
+    };
+
+    Session.getSessionUser = function () {
+      return user;
+    };
+
+    Session.isLogin = function () {
+      return !!token;
+    };
+    /**
+     * 销毁session
+     */
+    Session.destroy = function () {
+      token = null;
+      user = null;
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    };
+
+    Session._saveToLocalstorage = function (token) {
+      localStorage.setItem('token', token);
+    };
+
+    /**
+     * 获取token参数
+     * @returns {{token}}
+     */
+    Session.getTokenParam = function () {
+      return {access_token: token};
+    };
+
+    return Session;
   }
 
   function SignService($http, Session, $q, Config) {
@@ -362,10 +329,8 @@
 
 
   function ScheduleService(Config, $resource, Session) {
-    //?time=future&water_time=morning&is_done=0&plant_id=1&expand=plant
     return $resource(Config.api.SCHEDULE + '/:id', {
-      id: '@id',
-      access_token: Session.get()
+      id: '@id'
     }, {
       query: {
         method: 'GET',
@@ -401,8 +366,7 @@
 
   function PlantService(Config, $resource, Session) {
     return $resource(Config.api.PLANT + '/:id', {
-      id: '@id',
-      access_token: Session.get()
+      id: '@id'
     }, {
       get: {
         method: 'GET',
@@ -448,7 +412,9 @@
       _param.end_at = endDate.valueOf();
       _param.end_date = endDate.format('YYYY-MM-DD');
 
-      return serialParam(_param);
+      delete _param.$promise;
+      delete _param.$resolved;
+      return angular.serialParam(_param);
     }
 
     /**
@@ -477,9 +443,7 @@
   }
 
   function GrowthService(Config, $resource, Session) {
-    return $resource(Config.api.GROWTH, {
-      access_token: Session.get()
-    }, {
+    return $resource(Config.api.GROWTH, {}, {
       query: {
         method: 'GET',
         isArray: true,
@@ -496,7 +460,7 @@
           _param.date = moment(param.date).format('YYYY-MM-DD');
           _param.user_id = Session.getSessionUser().id;
 
-          return serialParam(_param);
+          return angular.serialParam(_param);
         },
         transformResponse: function (resp) {
           resp = angular.fromJson(resp);
@@ -568,8 +532,7 @@
 
   function WaterTimeService(Config, $resource, Session) {
     var WaterTime = $resource(Config.api.WATER_TIME + '/:id', {
-      id: '@user_id',
-      access_token: Session.get()
+      id: '@user_id'
     }, {
       get: {
         method: 'GET',
@@ -584,7 +547,7 @@
           _param.noon = moment(param.noon).format('HH:mm');
           _param.afternoon = moment(param.afternoon).format('HH:mm');
 
-          return serialParam(_param);
+          return angular.serialParam(_param);
         },
         tranformResponse: tranformResponseOne
       }
@@ -618,36 +581,33 @@
     return {
       init: function () {
 
-        $cordovaLocalNotification
-          .hasPermission()
-          .then(function (granted) {
-            //if has permisson ,query schedules and set local notification
-            //if has no,registerPermission
-            if (granted) {
-              var schedule = {
-                id: 123,
-                date:moment().format('YYYY-MM-DD'),
-                at: moment().add(2,'minutes').format('HH:mm'),
-                plant:{
-                  name:'富贵竹'
-                },
-                title: "Water Notify"
-              };
+        try{
+          $cordovaLocalNotification
+            .hasPermission()
+            .then(function (granted) {
+              //if has permisson ,query schedules and set local notification
+              //if has no,registerPermission
 
-              addOne(schedule);
-              //querySchedulesAndSetLocalNotifications();
-            } else {
-              $cordovaLocalNotification
-                .registerPermission()
-                .then(function (_granted) {
-                  if (_granted) {
-                    querySchedulesAndSetLocalNotifications();
-                  }
-                });
-            }
+              if (granted) {
+                querySchedulesAndSetLocalNotifications();
+              } else {
+                try {
+                  $cordovaLocalNotification
+                    .registerPermission()
+                    .then(function (_granted) {
+                      if (_granted) {
+                        querySchedulesAndSetLocalNotifications();
+                      }
+                    });
+                }catch (e){
 
-          });
+                }
+              }
 
+            });
+        }catch (e){
+
+        }
       }
     };
 
@@ -681,52 +641,96 @@
         text: schedule.plant.name + " need water",
         title: "Water Notify"
       };
+      try {
+        $cordovaLocalNotification
+          .isScheduled(id)
+          .then(function (isScheduled) {
 
-      $cordovaLocalNotification
-        .isScheduled(id)
-        .then(function (isScheduled) {
+            //首先判断该日程是否设置了提醒
+            //如果没有设置，则设置提醒
+            if (isScheduled) {
+              try{
+                $cordovaLocalNotification
+                  .isTriggered(id)
+                  .then(function (isTriggered) {
 
-          //首先判断该日程是否设置了提醒
-          //如果没有设置，则设置提醒
-          if (isScheduled) {
-            $cordovaLocalNotification
-              .isTriggered(id)
-              .then(function (isTriggered) {
+                    //如果已经设置了提醒，则看是否已经触发过
+                    //如果已经触发过了，则清除该提醒
+                    //如果没有触发过，则更新该提醒
+                    if (isTriggered) {
+                      $cordovaLocalNotification
+                        .clear(id)
+                        .then(function () {
 
-                //如果已经设置了提醒，则看是否已经触发过
-                //如果已经触发过了，则清除该提醒
-                //如果没有触发过，则更新该提醒
-                if (isTriggered) {
-                  $cordovaLocalNotification
-                    .clear(id)
-                    .then(function () {
-                      alert('The notification:' + id + 'has been cleared');
-                    });
-                } else {
+                        });
+                    } else {
 
-                  $cordovaLocalNotification
-                    .update(param)
-                    .then(function () {
-                      alert("The notification has been updated");
-                    });
-                }
-              });
+                      $cordovaLocalNotification
+                        .update(param)
+                        .then(function () {
 
-          } else {
-            $cordovaLocalNotification
-              .schedule(param)
-              .then(function () {
-                alert("The notification has been set");
-              });
-          }
-        });
+                        });
+                    }
+                  });
+              }catch (e){
+
+              }
+
+
+            } else {
+              $cordovaLocalNotification
+                .schedule(param)
+                .then(function () {
+
+                });
+            }
+          });
+      }catch (e){
+
+      }
+
     }
   }
 
-  function Interceptor($q, $rootScope, Config) {
+  function ScheduleNotification($rootScope, $timeout, $ionicModal, $toast) {
+    var scope = $rootScope.$new();
+    var modal;
+    $ionicModal
+      .fromTemplateUrl('templates/schedule-notify.html', {
+        scope: scope
+      })
+      .then(function (_modal) {
+        modal = _modal;
+      });
+
+    scope.hideModal = function () {
+      modal.hide();
+      scope.onClose();
+    };
+
+    scope.onIsDoneChange = function () {
+      scope.schedule.$toggleDone(function (resp) {
+        $toast.show('success');
+      });
+    };
+
+    return {
+      show: function (schedule, onClose) {
+
+        $timeout(function () {
+          scope.schedule = schedule;
+        }, 0);
+        scope.onClose = onClose || angular.noop;
+        modal.show();
+      }
+    }
+  }
+
+  function Interceptor($q, $rootScope, Config, Session) {
     var events = Config.events;
     return {
       request: function (config) {
+        config.url += '?access_token=' + Session.get();
         $rootScope.$broadcast(events.REQUEST_START, config);
         return config;
       },

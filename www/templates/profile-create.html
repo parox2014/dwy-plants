@@ -1,0 +1,35 @@
+<ion-view title="Profile">
+  <ion-content overflow-scroll="true" padding="true" scroll="false" class="has-header">
+    <form class="list" name="profileForm" ng-submit="onProfileFormSubmit($event)" novalidate>
+      <ion-list>
+        <label class="item item-input">
+          <span class="input-label">First Name</span>
+          <input type="text"
+                 ng-model="profile.first_name"
+                 ng-minlength="1"
+                 ng-maxlength="30"
+                 name="first_name"
+                 ng-required=""
+                 placeholder="">
+        </label>
+        <label class="item item-input">
+          <span class="input-label">Last Name</span>
+          <input type="text"
+                 ng-model="profile.last_name"
+                 ng-minlength="1"
+                 ng-maxlength="30"
+                 name="last_name"
+                 ng-required=""
+                 placeholder="">
+        </label>
+      </ion-list>
+      <div class="spacer" style="width: 300px; height: 29px;"></div>
+
+      <ng-geo-names view-model="profile"></ng-geo-names>
+
+      <button type="submit" class="button button-stable button-block" ng-disabled="profileForm.$invalid">
+        Create Account
+      </button>
+    </form>
+  </ion-content>
+</ion-view>
