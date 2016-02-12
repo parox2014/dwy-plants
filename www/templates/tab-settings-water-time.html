@@ -3,19 +3,19 @@
   <ion-content>
     <form name="waterTimeForm" ng-submit="onFormSubmit()" novalidate>
       <div class="list">
-        <label class="item item-input">
+        <label class="item item-input" ng-click="openDatePicker('morning')">
           <span class="input-label">Morning</span>
-          <input type="time" ng-model="vm.morning">
+          <p ng-bind="vm.morning|date:'HH:mm'"></p>
         </label>
 
-        <label class="item item-input">
+        <label class="item item-input" ng-click="openDatePicker('noon')">
           <span class="input-label">Noon</span>
-          <input type="time" ng-model="vm.noon">
+          <p ng-bind="vm.noon|date:'HH:mm'"></p>
         </label>
 
-        <label class="item item-input">
+        <label class="item item-input" ng-click="openDatePicker('afternoon')">
           <span class="input-label">Afternoon</span>
-          <input type="time" ng-model="vm.afternoon">
+          <p ng-bind="vm.afternoon|date:'HH:mm'"></p>
         </label>
       </div>
 

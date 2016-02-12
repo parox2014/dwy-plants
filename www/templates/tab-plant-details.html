@@ -1,6 +1,7 @@
 <ion-view title="{{vm.title}}">
   <ion-content class="padding">
-    <div style="border: 1px solid rgb(238, 238, 238); border-radius: 3px; text-align: center; width: 100%; background-color: #fff;"
+    <div
+      style="border: 1px solid rgb(238, 238, 238); border-radius: 3px; text-align: center; width: 100%; background-color: #fff;"
       class="padding">
       <i class="icon ion-image" style="font-size: 64px; color: rgb(136, 136, 136); vertical-align: middle;"
          ng-if="!plant.image"></i>
@@ -12,13 +13,16 @@
       </ion-item>
 
       <ion-toggle toggle-class="toggle-positive"
-                  ng-model="plant.sunlight">Sunlight</ion-toggle>
+                  ng-model="plant.sunlight">Sunlight
+      </ion-toggle>
       <ion-toggle toggle-class="toggle-positive"
                   do-not-aollow-both-false="plant.sunlight"
-                  ng-model="plant.nosunlight">Nosunlight</ion-toggle>
-      <ion-item>
-        <label>End Date</label>
-        <input type="date" ng-model="plant.end_date" min-date="{{}}" name="end_date">
+                  ng-model="plant.nosunlight">Nosunlight
+      </ion-toggle>
+      <ion-item class="item-input" ng-click="openDatePicker()">
+        <label class="input-label">End Date</label>
+        <p class="text-center"
+           ng-bind="plant.end_date|date:'yyyy-MM-dd'"></p>
       </ion-item>
 
       <ion-item class="item-divider">Schedule</ion-item>

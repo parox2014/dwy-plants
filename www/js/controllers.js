@@ -40,10 +40,10 @@
         }, 0);
       }
     })
-    .controller('TabsCtrl', function ($scope, WaterTime, Notification,$ionicPlatform) {
+    .controller('TabsCtrl', function ($scope, WaterTime, Notification, $ionicPlatform) {
       WaterTime.init();
       Notification.init();
-      $ionicPlatform.ready(function(){
+      $ionicPlatform.ready(function () {
         Notification.init();
       });
     })
@@ -143,7 +143,7 @@
 
     })
 
-    .controller('WaterTimeSettingsCtrl', function (WaterTime, $scope) {
+    .controller('WaterTimeSettingsCtrl', function (WaterTime, $scope, $cordovaDatePicker) {
       $scope.vm = WaterTime;
 
       $scope.onFormSubmit = function () {
@@ -151,6 +151,25 @@
           console.log(resp);
         });
       };
+
+
+      $scope.openDatePicker = function (type) {
+        var dfDate = new Date();
+        $cordovaDatePicker
+          .show({
+            date: dfDate,
+            mode: 'time',
+            minDate: dfDate,
+            allowOldDates: false,
+            allowFutureDates: true,
+            doneButtonLabel: 'DONE',
+            cancelButtonLabel: 'CANCEL'
+          })
+          .then(function (date) {
+            WaterTime[type] = date;
+          });
+      };
+
     })
 
     .controller('PasswordSettingsCtrl', function ($scope, Sign, $state, $ionicPopup) {
@@ -202,7 +221,8 @@
       };
       $scope.plantList = Plant.query();
     })
-    .controller('PlantDetailsCtrl', function ($scope, $stateParams, Plant, $toast, WaterFrequencyModal, $state, WaterTime) {
+    .controller('PlantDetailsCtrl', function ($scope, $stateParams, Plant, $toast, $cordovaDatePicker,
+                                              WaterFrequencyModal, $state, WaterTime, $ionicPopup) {
 
       $scope.vm = {
         title: 'Plants Details'
@@ -219,6 +239,23 @@
           $toast.show('Update plant success');
           $state.go('tab.plants');
         });
+      };
+
+      $scope.openDatePicker = function () {
+        var dfDate = moment().add(1, 'days').toDate();
+        $cordovaDatePicker
+          .show({
+            date: dfDate,
+            mode: 'date', // or 'time'
+            minDate: dfDate,
+            allowOldDates: false,
+            allowFutureDates: true,
+            doneButtonLabel: 'DONE',
+            cancelButtonLabel: 'CANCEL'
+          })
+          .then(function (date) {
+            plant.end_date = date;
+          });
       };
 
       WaterFrequencyModal.init($scope);
@@ -250,7 +287,8 @@
         }
       }
     })
-    .controller('PlantsAddCtrl', function ($scope, Plant, $toast, $ionicModal, Cache, $state, WaterFrequencyModal, WaterTime) {
+    .controller('PlantsAddCtrl', function ($scope, Plant, $toast, $ionicModal, $cordovaDatePicker,
+                                           Cache, $state, WaterFrequencyModal, WaterTime) {
       var plantDemo = Cache.plantDemo;
 
       if (!plantDemo) {
@@ -280,6 +318,23 @@
           $toast.show('Add plant success');
           $state.go('tab.plants', {}, {location: 'replace'});
         });
+      };
+
+      $scope.openDatePicker = function () {
+        var dfDate = moment().add(1, 'days').toDate();
+        $cordovaDatePicker
+          .show({
+            date: dfDate,
+            mode: 'date', // or 'time'
+            minDate: dfDate,
+            allowOldDates: false,
+            allowFutureDates: true,
+            doneButtonLabel: 'DONE',
+            cancelButtonLabel: 'CANCEL'
+          })
+          .then(function (date) {
+            plant.end_date = date;
+          });
       };
 
       WaterFrequencyModal.init($scope);
